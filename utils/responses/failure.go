@@ -1,4 +1,4 @@
-package apiResponses
+package responses
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ func Failure(w http.ResponseWriter, statusCode int, reason interface{}) error {
 		return errors.New(message)
 	}
 
-	body := response{Status: "Failed", Data: reason}
+	body := body{Status: "Failed", Data: reason}
 	payload, err := json.Marshal(body)
 	if err != nil {
 		return err

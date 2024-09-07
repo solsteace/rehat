@@ -1,4 +1,4 @@
-package apiResponses
+package responses
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 )
 
 func Success(w http.ResponseWriter, data interface{}) error {
-	body := response{Status: "Success", Data: data}
+	body := body{Status: "Success", Data: data}
 	payload, err := json.Marshal(body)
 	if err != nil {
 		return err

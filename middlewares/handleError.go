@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/solsteace/rest/utils/apiResponses"
+	"github.com/solsteace/rest/utils/responses"
 )
 
 type routeHandler func(w http.ResponseWriter, req *http.Request) error
@@ -19,7 +19,7 @@ func HandleError(handler routeHandler) http.Handler {
 
 			// Determine error type here
 
-			err = apiResponses.Failure(w, 500, struct {
+			err = responses.Failure(w, 500, struct {
 				Message string `json:"message"`
 			}{Message: err.Error()})
 

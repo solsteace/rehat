@@ -1,6 +1,6 @@
-package apiResponses
+package responses
 
-type response struct {
+type body struct {
 	Status string      `json:"status"`
 	Data   interface{} `json:"data"`
 }
