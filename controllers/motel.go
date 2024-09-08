@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
+	"strconv"
 
+	"github.com/solsteace/rest/models"
 	"github.com/solsteace/rest/services"
 )
 
@@ -11,65 +12,90 @@ type Motel struct {
 	Service services.Motel
 }
 
-func (r Motel) GetAll(w http.ResponseWriter, req *http.Request) error {
-	motels, err := r.Service.GetAll()
+func (m Motel) GetAll(w http.ResponseWriter, req *http.Request) error {
+	motels, err := m.Service.GetAll()
 	if err != nil {
 		return err
 	}
 
-	if err := Success(w, motels); err != nil {
+	if err := Success(w, http.StatusOK, motels); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r Motel) GetById(w http.ResponseWriter, req *http.Request) error {
-	motel, err := r.Service.GetById(req.PathValue("id"))
+func (m Motel) GetById(w http.ResponseWriter, req *http.Request) error {
+	motel, err := m.Service.GetById(req.PathValue("id"))
 	if err != nil {
 		return err
 	}
 
-	if err := Success(w, motel); err != nil {
+	if err := Success(w, http.StatusOK, motel); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r Motel) Create(w http.ResponseWriter, req *http.Request) error {
-	motel, err := r.Service.Create()
+func (m Motel) Create(w http.ResponseWriter, req *http.Request) error {
+	err := req.ParseForm()
 	if err != nil {
 		return err
 	}
 
-	data, err := json.Marshal(motel)
+	formData := req.PostForm
+	newMotel := models.Motel{
+		Name:          formData.Get("name"),
+		Location:      formData.Get("location"),
+		ContactNumber: formData.Get("contactNumber"),
+		Email:         formData.Get("email")}
+	newMotelId, err := m.Service.Create(newMotel)
 	if err != nil {
 		return err
 	}
 
-	w.WriteHeader(200)
-	w.Write(data)
-	return nil
-}
-
-func (r Motel) Edit(w http.ResponseWriter, req *http.Request) error {
-	motel, err := r.Service.EditById(req.PathValue("id"))
-	if err != nil {
-		return err
-	}
-
-	if err := Success(w, motel); err != nil {
+	newMotel.MotelID = int(newMotelId)
+	if err := Success(w, http.StatusCreated, newMotel); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r Motel) Delete(w http.ResponseWriter, req *http.Request) error {
-	err := r.Service.DeleteById(req.PathValue("id"))
+func (m Motel) Edit(w http.ResponseWriter, req *http.Request) error {
+	err := req.ParseForm()
 	if err != nil {
 		return err
 	}
 
-	if err := Success(w, nil); err != nil {
+	motelId, err := strconv.Atoi(req.PathValue("id"))
+	if err != nil {
+		return err
+	}
+
+	formData := req.PostForm
+	newMotel := models.Motel{
+		MotelID:       motelId,
+		Name:          formData.Get("name"),
+		Location:      formData.Get("location"),
+		ContactNumber: formData.Get("contactNumber"),
+		Email:         formData.Get("email")}
+	_, err = m.Service.EditById(req.PathValue("id"), newMotel)
+	if err != nil {
+		return err
+	}
+
+	if err := Success(w, http.StatusOK, newMotel); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Motel) Delete(w http.ResponseWriter, req *http.Request) error {
+	err := m.Service.DeleteById(req.PathValue("id"))
+	if err != nil {
+		return err
+	}
+
+	if err := Success(w, http.StatusNoContent, nil); err != nil {
 		return err
 	}
 	return nil
