@@ -1,12 +1,17 @@
-package responses
+package controllers
 
 import (
 	"encoding/json"
 	"net/http"
 )
 
+type responseBody struct {
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
+}
+
 func Success(w http.ResponseWriter, data interface{}) error {
-	body := body{Status: "Success", Data: data}
+	body := responseBody{Status: "Success", Data: data}
 	payload, err := json.Marshal(body)
 	if err != nil {
 		return err

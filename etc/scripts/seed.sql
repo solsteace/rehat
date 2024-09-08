@@ -9,7 +9,7 @@ CREATE TABLE `motels` (
     `contact_number` VARCHAR(15),
     `email` VARCHAR(100)
 );
-INSERT INTO `motels` (name, location, contact_number, email)
+INSERT INTO `motels` (`name`, `location`, `contact_number`, `email`)
     VALUES
         ('Sunset Motel', '123 Beach Rd, Ocean City', '555-123-4567', 'contact@sunsetmotel.com'),
         ('Mountain View Inn', '456 Hilltop Ave, Mountainville', '555-234-5678', 'info@mountainviewinn.com'),

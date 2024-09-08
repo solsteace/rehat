@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/solsteace/rest/services"
-	"github.com/solsteace/rest/utils/responses"
 )
 
 type Motel struct {
@@ -18,7 +17,7 @@ func (r Motel) GetAll(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := responses.Success(w, motels); err != nil {
+	if err := Success(w, motels); err != nil {
 		return err
 	}
 	return nil
@@ -30,7 +29,7 @@ func (r Motel) GetById(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := responses.Success(w, motel); err != nil {
+	if err := Success(w, motel); err != nil {
 		return err
 	}
 	return nil
@@ -58,7 +57,7 @@ func (r Motel) Edit(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := responses.Success(w, motel); err != nil {
+	if err := Success(w, motel); err != nil {
 		return err
 	}
 	return nil
@@ -70,7 +69,7 @@ func (r Motel) Delete(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := responses.Success(w, nil); err != nil {
+	if err := Success(w, nil); err != nil {
 		return err
 	}
 	return nil

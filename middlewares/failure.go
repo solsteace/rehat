@@ -1,4 +1,4 @@
-package responses
+package middlewares
 
 import (
 	"encoding/json"
@@ -7,13 +7,18 @@ import (
 	"net/http"
 )
 
+type payload struct {
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
+}
+
 func Failure(w http.ResponseWriter, statusCode int, reason interface{}) error {
 	if http.StatusText(statusCode) == "" {
 		message := fmt.Sprintf("Status code unknown: %d", statusCode)
 		return errors.New(message)
 	}
 
-	body := body{Status: "Failed", Data: reason}
+	body := payload{Status: "Failed", Data: reason}
 	payload, err := json.Marshal(body)
 	if err != nil {
 		return err

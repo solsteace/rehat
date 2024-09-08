@@ -7,7 +7,6 @@ import (
 
 	"github.com/solsteace/rest/controllers"
 	"github.com/solsteace/rest/services"
-	"github.com/solsteace/rest/utils/responses"
 )
 
 type routeHandler func(w http.ResponseWriter, req *http.Request) error
@@ -29,7 +28,7 @@ func HandleError(handler routeHandler) http.Handler {
 			data := struct {
 				Message string `json:"message"`
 			}{Message: message}
-			err = responses.Failure(w, statusCode, data)
+			err = Failure(w, statusCode, data)
 			if err != nil {
 				log.Printf("%s\n", err.Error())
 				w.WriteHeader(http.StatusInternalServerError)
