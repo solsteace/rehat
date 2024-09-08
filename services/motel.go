@@ -2,7 +2,6 @@ package services
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/solsteace/rest/models"
@@ -16,11 +15,10 @@ type Motel struct {
 
 func (r Motel) GetAll() ([]models.Motel, error) {
 	var motels []models.Motel
-
 	query := fmt.Sprintf("SELECT * FROM %s", TABLE_NAME)
 	rows, err := r.Db.Query(query)
 	if err != nil {
-		return motels, err
+		return motels, &ErrSQL{message: err.Error()}
 	}
 
 	defer rows.Close()
@@ -33,14 +31,14 @@ func (r Motel) GetAll() ([]models.Motel, error) {
 			&motel.ContactNumber,
 			&motel.Email)
 		if err != nil {
-			return motels, err
+			return motels, &ErrSQL{message: err.Error()}
 		}
 
 		motels = append(motels, motel)
 	}
 
 	if err := rows.Err(); err != nil {
-		return motels, err
+		return motels, &ErrSQL{message: err.Error()}
 	}
 	return motels, nil
 }
@@ -48,7 +46,7 @@ func (r Motel) GetAll() ([]models.Motel, error) {
 // TODO: Complete
 func (r Motel) Create() ([]models.Motel, error) {
 	var motel []models.Motel
-	return motel, errors.New("NOT IMPLEMENTED")
+	return motel, &ErrServiceNotImplemented{}
 }
 
 func (r Motel) GetById(id string) (models.Motel, error) {
@@ -57,7 +55,7 @@ func (r Motel) GetById(id string) (models.Motel, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE motel_id=?", TABLE_NAME)
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
-		return motel, nil
+		return motel, &ErrSQL{message: err.Error()}
 	}
 
 	err = stmt.QueryRow(id).Scan(
@@ -67,7 +65,7 @@ func (r Motel) GetById(id string) (models.Motel, error) {
 		&motel.ContactNumber,
 		&motel.Email)
 	if err != nil {
-		return motel, err
+		return motel, &ErrSQL{message: err.Error()}
 	}
 	return motel, nil
 }
@@ -75,19 +73,19 @@ func (r Motel) GetById(id string) (models.Motel, error) {
 // TODO: Complete
 func (r Motel) EditById(id string) (models.Motel, error) {
 	var motel models.Motel
-	return motel, errors.New("NOT IMPLEMENTED")
+	return motel, &ErrServiceNotImplemented{}
 }
 
 func (r Motel) DeleteById(id string) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE motel_id=?", TABLE_NAME)
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
-		return nil
+		return &ErrSQL{message: err.Error()}
 	}
 
 	_, err = stmt.Query(id)
 	if err != nil {
-		return err
+		return &ErrSQL{message: err.Error()}
 	}
 	return nil
 }

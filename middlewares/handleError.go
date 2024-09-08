@@ -3,7 +3,10 @@ package middlewares
 import (
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/solsteace/rest/controllers"
+	"github.com/solsteace/rest/services"
 	"github.com/solsteace/rest/utils/responses"
 )
 
@@ -17,17 +20,42 @@ func HandleError(handler routeHandler) http.Handler {
 				return
 			}
 
-			// Determine error type here
+			statusCode := getErrStatusCode(err)
+			message := err.Error()
+			if os.Getenv("ENVIRONMENT") != "DEVEL" {
+				message = getProductionMessage(err)
+			}
 
-			err = responses.Failure(w, 500, struct {
+			data := struct {
 				Message string `json:"message"`
-			}{Message: err.Error()})
-
+			}{Message: message}
+			err = responses.Failure(w, statusCode, data)
 			if err != nil {
 				log.Printf("%s\n", err.Error())
-				w.WriteHeader(500)
+				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte("Internal server error"))
 			}
 		},
 	)
+}
+
+// Might be useful in production for more user-friendly response
+func getProductionMessage(e error) string {
+	switch e.(type) {
+	// TODO: Complete
+	}
+	return ""
+}
+
+func getErrStatusCode(e error) int {
+	statusCode := http.StatusInternalServerError
+	switch e.(type) {
+	case *controllers.ErrAuth:
+		statusCode = http.StatusUnauthorized
+	case *services.ErrServiceNotImplemented:
+		statusCode = http.StatusNotImplemented
+	case *services.ErrSQL: // Skip or keep for clarity?
+		statusCode = http.StatusInternalServerError
+	}
+	return statusCode
 }

@@ -19,7 +19,7 @@ func Failure(w http.ResponseWriter, statusCode int, reason interface{}) error {
 		return err
 	}
 
-	w.WriteHeader(statusCode) // TODO: Bad request thingy
+	w.WriteHeader(statusCode)
 	w.Write(payload)
 	return nil
 }
