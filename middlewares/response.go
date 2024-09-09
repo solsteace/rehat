@@ -12,7 +12,7 @@ type payload struct {
 	Data   interface{} `json:"data"`
 }
 
-func Failure(w http.ResponseWriter, statusCode int, reason interface{}) error {
+func sendError(w http.ResponseWriter, statusCode int, reason interface{}) error {
 	if http.StatusText(statusCode) == "" {
 		message := fmt.Sprintf("Status code unknown: %d", statusCode)
 		return errors.New(message)

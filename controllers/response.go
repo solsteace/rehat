@@ -10,7 +10,7 @@ type responseBody struct {
 	Data   interface{} `json:"data"`
 }
 
-func Success(w http.ResponseWriter, statusCode int, data interface{}) error {
+func sendResponse(w http.ResponseWriter, statusCode int, data interface{}) error {
 	body := responseBody{Status: "Success", Data: data}
 	payload, err := json.Marshal(body)
 	if err != nil {

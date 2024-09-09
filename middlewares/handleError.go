@@ -28,7 +28,7 @@ func HandleError(handler routeHandler) http.Handler {
 			data := struct {
 				Message string `json:"message"`
 			}{Message: message}
-			err = Failure(w, statusCode, data)
+			err = sendError(w, statusCode, data)
 			if err != nil {
 				log.Printf("%s\n", err.Error())
 				w.WriteHeader(http.StatusInternalServerError)

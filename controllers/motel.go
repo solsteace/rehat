@@ -18,7 +18,7 @@ func (m Motel) GetAll(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := Success(w, http.StatusOK, motels); err != nil {
+	if err := sendResponse(w, http.StatusOK, motels); err != nil {
 		return err
 	}
 	return nil
@@ -30,7 +30,7 @@ func (m Motel) GetById(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := Success(w, http.StatusOK, motel); err != nil {
+	if err := sendResponse(w, http.StatusOK, motel); err != nil {
 		return err
 	}
 	return nil
@@ -54,7 +54,7 @@ func (m Motel) Create(w http.ResponseWriter, req *http.Request) error {
 	}
 
 	newMotel.MotelID = int(newMotelId)
-	if err := Success(w, http.StatusCreated, newMotel); err != nil {
+	if err := sendResponse(w, http.StatusCreated, newMotel); err != nil {
 		return err
 	}
 	return nil
@@ -83,7 +83,7 @@ func (m Motel) Edit(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := Success(w, http.StatusOK, newMotel); err != nil {
+	if err := sendResponse(w, http.StatusOK, newMotel); err != nil {
 		return err
 	}
 	return nil
@@ -95,7 +95,7 @@ func (m Motel) Delete(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := Success(w, http.StatusNoContent, nil); err != nil {
+	if err := sendResponse(w, http.StatusNoContent, nil); err != nil {
 		return err
 	}
 	return nil
