@@ -16,8 +16,7 @@ type app struct {
 }
 
 func (a *app) init() {
-	motelService := services.Motel{Db: a.db}
-	motel := controllers.Motel{Service: motelService}
+	motel := controllers.Motel{Db: a.db}
 	motelApi := http.NewServeMux()
 	motelApi.Handle("GET /{id}", middlewares.HandleError(motel.GetById))
 	motelApi.Handle("PUT /{id}", middlewares.HandleError(motel.Edit))
@@ -25,12 +24,7 @@ func (a *app) init() {
 	motelApi.Handle("GET /", middlewares.HandleError(motel.GetAll))
 	motelApi.Handle("POST /", middlewares.HandleError(motel.Create))
 
-	userService := services.User{Db: a.db}
-
-	authService := services.Auth{
-		Db:             a.db,
-		User:           userService,
-		AccessTokenCfg: a.AccessTokenCfg}
+	authService := services.Auth{Db: a.db, AccessTokenCfg: a.AccessTokenCfg}
 	auth := controllers.Auth{Service: authService}
 	authApi := http.NewServeMux()
 	authApi.Handle("POST /login", middlewares.HandleError(auth.LogIn))

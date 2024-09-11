@@ -27,8 +27,7 @@ type (
 
 	Auth struct {
 		AccessTokenCfg
-		User User
-		Db   *sql.DB
+		Db *sql.DB
 	}
 
 	TokenClaims struct {
@@ -40,9 +39,10 @@ type (
 func (a Auth) LogIn(username, password string) (string, error) {
 	var accessToken string
 
-	u, err := a.User.GetByUsername(username)
+	u := models.User{}
+	u, err := u.GetByUsername(a.Db, username)
 	if err != nil {
-		if _, ok := err.(*ErrRecordNotFound); !ok {
+		if _, ok := err.(*models.ErrRecordNotFound); !ok {
 			return accessToken, err
 		}
 	}
@@ -72,24 +72,25 @@ func (a Auth) LogIn(username, password string) (string, error) {
 func (a Auth) Register(user models.User) (string, error) {
 	var accessToken string
 
-	u, err := a.User.GetByUsername(user.Username)
+	u := models.User{}
+	u, err := u.GetByUsername(a.Db, user.Username)
 	if err != nil {
-		if _, ok := err.(*ErrRecordNotFound); !ok {
+		if _, ok := err.(*models.ErrRecordNotFound); !ok {
 			return accessToken, err
 		}
 	}
 	if !u.IsNil() {
-		return accessToken, &ErrDuplicateEntry{field: "username"}
+		return accessToken, &models.ErrDuplicateEntry{Field: "username"}
 	}
 
-	u, err = a.User.GetByEmail(user.Email)
+	u, err = u.GetByEmail(a.Db, user.Email)
 	if err != nil {
-		if _, ok := err.(*ErrRecordNotFound); !ok {
+		if _, ok := err.(*models.ErrRecordNotFound); !ok {
 			return accessToken, err
 		}
 	}
 	if !u.IsNil() {
-		return accessToken, &ErrDuplicateEntry{field: "email"}
+		return accessToken, &models.ErrDuplicateEntry{Field: "email"}
 	}
 
 	hash, err := bcrypt.GenerateFromPassword(user.Password, bcrypt.DefaultCost)
@@ -98,7 +99,7 @@ func (a Auth) Register(user models.User) (string, error) {
 	}
 
 	user.Password = hash
-	insertId, err := a.User.Create(user)
+	insertId, err := user.Save(a.Db)
 	if err != nil {
 		return accessToken, err
 	}

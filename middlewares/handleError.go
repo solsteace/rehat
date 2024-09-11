@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/solsteace/rest/models"
 	"github.com/solsteace/rest/services"
 )
 
@@ -48,22 +49,22 @@ func getProductionMessage(e error) string {
 func getErrStatusCode(e error) int {
 	switch e.(type) {
 	// === 400 BadRequest
-	case *services.ErrDuplicateEntry:
+	case *models.ErrDuplicateEntry:
 		return http.StatusBadRequest
 
 	// === 401 Unauthorized
 	// case *services.ErrDuplicateEntry:
 
 	// === 404 NotFound
-	case *services.ErrRecordNotFound:
+	case *models.ErrRecordNotFound:
 		return http.StatusNotFound
 
 	// === 501 NotImplemented
 	case *services.ErrNotImplemented:
 		return http.StatusNotImplemented
 
-	// === 500 InternalServerError
-	case *services.ErrSQL: // Skip or keep for clarity?
+	// === 500 InternalServerError (kept for clarity)
+	case *services.ErrSQL, *models.ErrSQL:
 		return http.StatusInternalServerError
 	}
 	return http.StatusInternalServerError

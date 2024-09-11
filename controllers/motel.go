@@ -1,19 +1,20 @@
 package controllers
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 
 	"github.com/solsteace/rest/models"
-	"github.com/solsteace/rest/services"
 )
 
 type Motel struct {
-	Service services.Motel
+	Db *sql.DB
 }
 
 func (m Motel) GetAll(w http.ResponseWriter, req *http.Request) error {
-	motels, err := m.Service.GetAll()
+	motel := models.Motel{}
+	motels, err := motel.GetAll(m.Db)
 	if err != nil {
 		return err
 	}
@@ -25,7 +26,8 @@ func (m Motel) GetAll(w http.ResponseWriter, req *http.Request) error {
 }
 
 func (m Motel) GetById(w http.ResponseWriter, req *http.Request) error {
-	motel, err := m.Service.GetById(req.PathValue("id"))
+	motel := models.Motel{}
+	motel, err := motel.GetById(m.Db, req.PathValue("id"))
 	if err != nil {
 		return err
 	}
@@ -43,18 +45,18 @@ func (m Motel) Create(w http.ResponseWriter, req *http.Request) error {
 	}
 
 	formData := req.PostForm
-	newMotel := models.Motel{
+	motel := models.Motel{
 		Name:          formData.Get("name"),
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
 		Email:         formData.Get("email")}
-	newMotelId, err := m.Service.Create(newMotel)
+	newMotelId, err := motel.Save(m.Db)
 	if err != nil {
 		return err
 	}
 
-	newMotel.MotelID = int(newMotelId)
-	if err := sendResponse(w, http.StatusCreated, newMotel); err != nil {
+	motel.MotelID = int(newMotelId)
+	if err := sendResponse(w, http.StatusCreated, motel); err != nil {
 		return err
 	}
 	return nil
@@ -72,25 +74,26 @@ func (m Motel) Edit(w http.ResponseWriter, req *http.Request) error {
 	}
 
 	formData := req.PostForm
-	newMotel := models.Motel{
+	motel := models.Motel{
 		MotelID:       motelId,
 		Name:          formData.Get("name"),
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
 		Email:         formData.Get("email")}
-	_, err = m.Service.EditById(req.PathValue("id"), newMotel)
+	_, err = motel.EditById(m.Db, req.PathValue("id"))
 	if err != nil {
 		return err
 	}
 
-	if err := sendResponse(w, http.StatusOK, newMotel); err != nil {
+	if err := sendResponse(w, http.StatusOK, motel); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (m Motel) Delete(w http.ResponseWriter, req *http.Request) error {
-	err := m.Service.DeleteById(req.PathValue("id"))
+	motel := models.Motel{}
+	err := motel.DeleteById(m.Db, req.PathValue("id"))
 	if err != nil {
 		return err
 	}
