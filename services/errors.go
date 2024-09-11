@@ -23,3 +23,11 @@ type ErrServiceNotImplemented struct{}
 func (e *ErrServiceNotImplemented) Error() string {
 	return "Service is not implemented yet"
 }
+
+type ErrDuplicateEntry struct {
+	field string
+}
+
+func (e *ErrDuplicateEntry) Error() string {
+	return fmt.Sprintf("Duplicate entry for `%s`", e.field)
+}

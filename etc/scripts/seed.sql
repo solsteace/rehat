@@ -1,6 +1,17 @@
 CREATE DATABASE IF NOT EXISTS `gorest`;
 USE `gorest`;
 
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+    `user_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `email` VARCHAR(63) UNIQUE,
+    `username` VARCHAR(31) UNIQUE,
+    `name` VARCHAR(63),
+    `password` VARBINARY(63),
+    `role` ENUM("admin", "staff", "customer") DEFAULT "customer"
+);
+
+
 DROP TABLE IF EXISTS `motels`;
 CREATE TABLE `motels` (
     `motel_id` INT PRIMARY KEY AUTO_INCREMENT,

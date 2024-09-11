@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/solsteace/rest/controllers"
 	"github.com/solsteace/rest/services"
 )
 
@@ -49,10 +48,18 @@ func getProductionMessage(e error) string {
 func getErrStatusCode(e error) int {
 	statusCode := http.StatusInternalServerError
 	switch e.(type) {
-	case *controllers.ErrAuth:
-		statusCode = http.StatusUnauthorized
+	// === 400 BadRequest
+	case *services.ErrDuplicateEntry:
+		statusCode = http.StatusBadRequest
+
+	// === 401 Unauthorized
+	// case *services.ErrDuplicateEntry:
+
+	// === 501 NotImplemented
 	case *services.ErrServiceNotImplemented:
 		statusCode = http.StatusNotImplemented
+
+	// === 500 InternalServerError
 	case *services.ErrSQL: // Skip or keep for clarity?
 		statusCode = http.StatusInternalServerError
 	}
