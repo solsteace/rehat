@@ -55,7 +55,7 @@ func (u User) GetByUsername(username string) (models.User, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return user, &ErrSQLNoRows{
+			return user, &ErrRecordNotFound{
 				message: fmt.Sprintf("Couldn't find user with username %s", username)}
 		}
 		return user, &ErrSQL{message: err.Error()}
@@ -83,7 +83,7 @@ func (u User) GetById(id string) (models.User, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return user, &ErrSQLNoRows{
+			return user, &ErrRecordNotFound{
 				message: fmt.Sprintf("Couldn't find user with id %s", id)}
 		}
 		return user, &ErrSQL{message: err.Error()}
@@ -111,7 +111,7 @@ func (u User) GetByEmail(email string) (models.User, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return user, &ErrSQLNoRows{
+			return user, &ErrRecordNotFound{
 				message: fmt.Sprintf("Couldn't find user with email %s", email)}
 		}
 		return user, &ErrSQL{message: err.Error()}

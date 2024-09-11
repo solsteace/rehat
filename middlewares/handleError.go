@@ -46,22 +46,25 @@ func getProductionMessage(e error) string {
 }
 
 func getErrStatusCode(e error) int {
-	statusCode := http.StatusInternalServerError
 	switch e.(type) {
 	// === 400 BadRequest
 	case *services.ErrDuplicateEntry:
-		statusCode = http.StatusBadRequest
+		return http.StatusBadRequest
 
 	// === 401 Unauthorized
 	// case *services.ErrDuplicateEntry:
 
+	// === 404 NotFound
+	case *services.ErrRecordNotFound:
+		return http.StatusNotFound
+
 	// === 501 NotImplemented
-	case *services.ErrServiceNotImplemented:
-		statusCode = http.StatusNotImplemented
+	case *services.ErrNotImplemented:
+		return http.StatusNotImplemented
 
 	// === 500 InternalServerError
 	case *services.ErrSQL: // Skip or keep for clarity?
-		statusCode = http.StatusInternalServerError
+		return http.StatusInternalServerError
 	}
-	return statusCode
+	return http.StatusInternalServerError
 }

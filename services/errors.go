@@ -10,17 +10,17 @@ func (e *ErrSQL) Error() string {
 	return fmt.Sprintf("[Uncategorized SQL Error] %s", e.message)
 }
 
-type ErrSQLNoRows struct {
+type ErrRecordNotFound struct {
 	message string
 }
 
-func (e *ErrSQLNoRows) Error() string {
+func (e *ErrRecordNotFound) Error() string {
 	return e.message
 }
 
-type ErrServiceNotImplemented struct{}
+type ErrNotImplemented struct{}
 
-func (e *ErrServiceNotImplemented) Error() string {
+func (e *ErrNotImplemented) Error() string {
 	return "Service is not implemented yet"
 }
 

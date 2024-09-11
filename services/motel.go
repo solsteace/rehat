@@ -83,7 +83,7 @@ func (m Motel) GetById(id string) (models.Motel, error) {
 		&motel.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return motel, &ErrSQLNoRows{
+			return motel, &ErrRecordNotFound{
 				message: fmt.Sprintf("Couldn't find motel with id %s", id)}
 		}
 		return motel, &ErrSQL{message: err.Error()}

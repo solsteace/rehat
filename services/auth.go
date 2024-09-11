@@ -42,7 +42,7 @@ func (a Auth) LogIn(username, password string) (string, error) {
 
 	u, err := a.User.GetByUsername(username)
 	if err != nil {
-		if _, ok := err.(*ErrSQLNoRows); !ok {
+		if _, ok := err.(*ErrRecordNotFound); !ok {
 			return accessToken, err
 		}
 	}
@@ -74,7 +74,7 @@ func (a Auth) Register(user models.User) (string, error) {
 
 	u, err := a.User.GetByUsername(user.Username)
 	if err != nil {
-		if _, ok := err.(*ErrSQLNoRows); !ok {
+		if _, ok := err.(*ErrRecordNotFound); !ok {
 			return accessToken, err
 		}
 	}
@@ -84,7 +84,7 @@ func (a Auth) Register(user models.User) (string, error) {
 
 	u, err = a.User.GetByEmail(user.Email)
 	if err != nil {
-		if _, ok := err.(*ErrSQLNoRows); !ok {
+		if _, ok := err.(*ErrRecordNotFound); !ok {
 			return accessToken, err
 		}
 	}
