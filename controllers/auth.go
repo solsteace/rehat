@@ -43,15 +43,18 @@ func (a Auth) Register(w http.ResponseWriter, req *http.Request) error {
 		Name:     formData.Get("name"),
 		Username: formData.Get("username"),
 		Password: []byte(formData.Get("password")),
-		Email:    formData.Get("email")}
-	accessToken, err := a.Service.Register(newUser)
+		Email:    formData.Get("email"),
+		Role:     "customer",
+		IsActive: true}
+	newUser, accessToken, err := a.Service.Register(newUser)
 	if err != nil {
 		return err
 	}
 
 	payload := struct {
+		models.User `json:"user"`
 		AccessToken string `json:"authorization"`
-	}{AccessToken: accessToken}
+	}{User: newUser, AccessToken: accessToken}
 	if err := sendResponse(w, http.StatusCreated, payload); err != nil {
 		return err
 	}

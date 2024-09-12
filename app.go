@@ -19,10 +19,7 @@ func (a *app) init() {
 	motel := controllers.Motel{Db: a.db}
 	motelApi := http.NewServeMux()
 	motelApi.Handle("GET /{id}", middlewares.HandleError(motel.GetById))
-	motelApi.Handle("PUT /{id}", middlewares.HandleError(motel.Edit))
-	motelApi.Handle("DELETE /{id}", middlewares.HandleError(motel.Delete))
 	motelApi.Handle("GET /", middlewares.HandleError(motel.GetAll))
-	motelApi.Handle("POST /", middlewares.HandleError(motel.Create))
 
 	authService := services.Auth{Db: a.db, AccessTokenCfg: a.AccessTokenCfg}
 	auth := controllers.Auth{Service: authService}
@@ -30,9 +27,18 @@ func (a *app) init() {
 	authApi.Handle("POST /login", middlewares.HandleError(auth.LogIn))
 	authApi.Handle("POST /register", middlewares.HandleError(auth.Register))
 
+	// TODO: Authorization based on resource ownership
+	admin := controllers.Admin{Auth: authService}
+	adminApi := http.NewServeMux()
+	adminApi.Handle("POST /register", middlewares.HandleError(admin.Register))
+	adminApi.Handle("POST /motel", middlewares.HandleError(admin.AddMotel))
+	adminApi.Handle("PUT /motel/{id}", middlewares.HandleError(admin.EditMotelById))
+	adminApi.Handle("DELETE /motel/{id}", middlewares.HandleError(admin.DeleteMotelById))
+
 	api := http.NewServeMux()
 	api.Handle("/motels/", http.StripPrefix("/motels", motelApi))
 	api.Handle("/auth/", http.StripPrefix("/auth", authApi))
+	api.Handle("/admin/", http.StripPrefix("/admin", adminApi))
 
 	router := http.NewServeMux()
 	router.Handle(
