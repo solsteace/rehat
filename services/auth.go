@@ -58,6 +58,7 @@ func (a Auth) LogIn(username, password string) (string, error) {
 
 	payload := TokenClaims{
 		UserId: u.UserId,
+		Role:   u.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(a.AccessTokenCfg.Lifetime)),

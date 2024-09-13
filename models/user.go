@@ -54,7 +54,7 @@ func (u User) GetByUsername(db *sql.DB, username string) (User, error) {
 func (u User) GetById(db *sql.DB, id string) (User, error) {
 	var user User
 
-	query := "SELECT * FROM users WHERE id=?"
+	query := "SELECT * FROM users WHERE user_id=?"
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return user, &ErrSQL{message: err.Error()}

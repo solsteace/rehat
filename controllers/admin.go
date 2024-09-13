@@ -3,8 +3,8 @@ package controllers
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
+	"github.com/solsteace/rest/middlewares"
 	"github.com/solsteace/rest/models"
 	"github.com/solsteace/rest/services"
 )
@@ -49,6 +49,12 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
+	// TODO: Make transaction
+	userId, err := middlewares.TokenUserId(req.Context())
+	if err != nil {
+		return err
+	}
+
 	formData := req.PostForm
 	motel := models.Motel{
 		Name:          formData.Get("name"),
@@ -60,51 +66,59 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	motel.MotelID = int(newMotelId)
-	if err := sendResponse(w, http.StatusCreated, motel); err != nil {
+	motel.MotelID = newMotelId
+	motelAdmin := models.MotelAdmin{
+		UserID:  userId,
+		MotelID: int64(motel.MotelID)}
+
+	payload := struct {
+		Motel      models.Motel      `json:"motel"`
+		MotelAdmin models.MotelAdmin `json:"motelAdmin"`
+	}{Motel: motel, MotelAdmin: motelAdmin}
+	if err := sendResponse(w, http.StatusCreated, payload); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a Admin) EditMotelById(w http.ResponseWriter, req *http.Request) error {
-	err := req.ParseForm()
-	if err != nil {
-		return err
-	}
+// func (a Admin) EditMotelById(w http.ResponseWriter, req *http.Request) error {
+// 	err := req.ParseForm()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	motelId, err := strconv.Atoi(req.PathValue("id"))
-	if err != nil {
-		return err
-	}
+// 	motelId, err := strconv.Atoi(req.PathValue("id"))
+// 	if err != nil {
+// 		return err
+// 	}
 
-	formData := req.PostForm
-	motel := models.Motel{
-		MotelID:       motelId,
-		Name:          formData.Get("name"),
-		Location:      formData.Get("location"),
-		ContactNumber: formData.Get("contactNumber"),
-		Email:         formData.Get("email")}
-	_, err = motel.EditById(a.Db, req.PathValue("id"))
-	if err != nil {
-		return err
-	}
+// 	formData := req.PostForm
+// 	motel := models.Motel{
+// 		MotelID:       motelId,
+// 		Name:          formData.Get("name"),
+// 		Location:      formData.Get("location"),
+// 		ContactNumber: formData.Get("contactNumber"),
+// 		Email:         formData.Get("email")}
+// 	_, err = motel.EditById(a.Db, req.PathValue("id"))
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if err := sendResponse(w, http.StatusOK, motel); err != nil {
-		return err
-	}
-	return nil
-}
+// 	if err := sendResponse(w, http.StatusOK, motel); err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
-func (a Admin) DeleteMotelById(w http.ResponseWriter, req *http.Request) error {
-	motel := models.Motel{}
-	err := motel.DeleteById(a.Db, req.PathValue("id"))
-	if err != nil {
-		return err
-	}
+// func (a Admin) DeleteMotelById(w http.ResponseWriter, req *http.Request) error {
+// 	motel := models.Motel{}
+// 	err := motel.DeleteById(a.Db, req.PathValue("id"))
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if err := sendResponse(w, http.StatusNoContent, nil); err != nil {
-		return err
-	}
-	return nil
-}
+// 	if err := sendResponse(w, http.StatusNoContent, nil); err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }

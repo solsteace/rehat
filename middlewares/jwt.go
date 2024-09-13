@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -8,6 +10,16 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/solsteace/rest/services"
 )
+
+type (
+	middlewareKey string
+	tokenContent  struct {
+		userId   int64
+		userRole string
+	}
+)
+
+const tokenKey middlewareKey = "token"
 
 func Jwt(next http.Handler) http.Handler {
 	return http.HandlerFunc(
@@ -43,14 +55,36 @@ func Jwt(next http.Handler) http.Handler {
 				return
 			}
 
-			_, ok := parsedToken.Claims.(*services.TokenClaims)
+			claims, ok := parsedToken.Claims.(*services.TokenClaims)
 			if !ok {
 				payload := services.ErrAccessToken{Message: "No defined claim found within JWT"}
 				sendError(w, http.StatusBadRequest, payload)
 				return
 			}
 
-			next.ServeHTTP(w, req)
+			ctx := context.WithValue(
+				context.Background(),
+				middlewareKey(tokenKey),
+				&tokenContent{
+					userId:   claims.UserId,
+					userRole: claims.Role})
+			next.ServeHTTP(w, req.WithContext(ctx))
 		},
 	)
+}
+
+func TokenUserId(ctx context.Context) (int64, error) {
+	v, ok := ctx.Value(tokenKey).(*tokenContent)
+	if !ok {
+		return 0, errors.New("no `userId` found")
+	}
+	return v.userId, nil
+}
+
+func TokenUserRole(ctx context.Context) (string, error) {
+	v, ok := ctx.Value(tokenKey).(*tokenContent)
+	if !ok {
+		return "", errors.New("no `userRole` found")
+	}
+	return v.userRole, nil
 }

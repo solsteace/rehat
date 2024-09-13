@@ -1,0 +1,169 @@
+{
+  "main": {
+    "id": "4a0a81fe2ffa0a57",
+    "type": "split",
+    "children": [
+      {
+        "id": "8027e75cb7194514",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "438952d2a313372d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Rules and Logic.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "f28bcde2a5239844",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a9d66088b2a18b4c",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "abb421715a636b0e",
+    "type": "split",
+    "children": [
+      {
+        "id": "2f2fa02b3ffb9008",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "48eb8cf2ecc42b46",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "f283d203603331ce",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "c463d021ea4962b1",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "right": {
+    "id": "ae7ae114b065a51a",
+    "type": "split",
+    "children": [
+      {
+        "id": "715cfa00571b7730",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "146123bd21a3cc03",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Rules and Logic.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "f058147ac0788807",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Rules and Logic.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "e8eca9782121484f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "919488fd1b8f138c",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Rules and Logic.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "438952d2a313372d",
+  "lastOpenFiles": [
+    "Business Logic.md",
+    "Rules and Logic.md"
+  ]
+}
