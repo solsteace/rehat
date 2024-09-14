@@ -46,14 +46,14 @@ func (a *app) init() {
 	authApi.Handle("POST /register", mw.HandleError(auth.Register))
 
 	adminMotelApi := http.NewServeMux()
-	adminMotelApi.Handle("POST /", mw.HandleError(admin.AddMotel))
 	adminMotelApi.Handle("PUT /{id}", mw.HandleError(admin.EditMotelById))
 	adminMotelApi.Handle("DELETE /{id}", mw.HandleError(admin.DeleteMotelById))
+	adminMotelApi.Handle("POST /", mw.HandleError(admin.AddMotel))
 
 	adminApi := http.NewServeMux()
 	adminApi.Handle("POST /register", mw.HandleError(admin.Register))
 	adminApi.Handle(
-		"POST /motels/",
+		"/motels/",
 		http.StripPrefix("/motels", mw.Jwt(mw.Admin(adminMotelApi))))
 
 	profileApi := http.NewServeMux()

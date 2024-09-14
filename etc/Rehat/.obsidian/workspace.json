@@ -100,7 +100,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Rules and Logic.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -117,7 +116,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Rules and Logic.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -139,9 +137,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "Rules and Logic.md"
-              }
+              "state": {}
             }
           }
         ]
@@ -161,9 +157,9 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "438952d2a313372d",
+  "active": "a9d66088b2a18b4c",
   "lastOpenFiles": [
-    "Business Logic.md",
-    "Rules and Logic.md"
+    "Rules and Logic.md",
+    "Business Logic.md"
   ]
 }

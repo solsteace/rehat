@@ -70,8 +70,8 @@ func (m Motel) GetById(id int64) (models.Motel, error) {
 }
 
 func (m Motel) Save(motel models.Motel) (int64, error) {
-	query := `INSERT INTO motels(name, location, contact_number, email) 
-				VALUES (?, ?, ?, ?)`
+	query := `INSERT INTO motels(name, location, contact_number, email, rating) 
+				VALUES (?, ?, ?, ?, ?)`
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
@@ -81,7 +81,8 @@ func (m Motel) Save(motel models.Motel) (int64, error) {
 		motel.Name,
 		motel.Location,
 		motel.ContactNumber,
-		motel.Email)
+		motel.Email,
+		motel.Rating)
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
 	}
@@ -105,7 +106,8 @@ func (m Motel) EditById(id int64, motel models.Motel) error {
 					name = ?, 
 					location = ?, 
 					contact_number = ?, 
-					email = ?
+					email = ?,
+					rating = ?
 				WHERE 
 					motel_id = ?  `
 	stmt, err := m.Db.Prepare(query)
@@ -118,6 +120,7 @@ func (m Motel) EditById(id int64, motel models.Motel) error {
 		motel.Location,
 		motel.ContactNumber,
 		motel.Email,
+		motel.Rating,
 		motel.MotelID)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}

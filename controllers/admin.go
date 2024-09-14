@@ -59,9 +59,10 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 		Name:          formData.Get("name"),
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
-		Email:         formData.Get("email")}
+		Email:         formData.Get("email"),
+		Rating:        0}
 	admin := models.MotelAdmin{UserID: userId}
-	if err := a.MotelManagement.AddMotel(&motel, &admin); err != nil {
+	if err := a.MotelManagement.Add(&admin, &motel); err != nil {
 		return err
 	}
 
@@ -80,21 +81,32 @@ func (a Admin) EditMotelById(w http.ResponseWriter, req *http.Request) error {
 	if err != nil {
 		return err
 	}
+	formData := req.PostForm
+
+	userId, err := middlewares.TokenUserId(req.Context())
+	if err != nil {
+		return err
+	}
 
 	motelId, err := strconv.ParseInt(req.PathValue("id"), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	formData := req.PostForm
+	motelRating, err := strconv.Atoi((formData.Get("rating")))
+	if err != nil {
+		return err
+	}
+
 	motel := models.Motel{
 		MotelID:       motelId,
 		Name:          formData.Get("name"),
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
-		Email:         formData.Get("email")}
-	err = a.MotelManagement.EditById(motelId, motel)
-	if err != nil {
+		Email:         formData.Get("email"),
+		Rating:        motelRating}
+
+	if err := a.MotelManagement.EditById(userId, motelId, &motel); err != nil {
 		return err
 	}
 
@@ -110,7 +122,12 @@ func (a Admin) DeleteMotelById(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := a.MotelManagement.DeleteMotelById(motelId); err != nil {
+	userId, err := middlewares.TokenUserId(req.Context())
+	if err != nil {
+		return err
+	}
+
+	if err := a.MotelManagement.DeleteById(userId, motelId); err != nil {
 		return err
 	}
 
