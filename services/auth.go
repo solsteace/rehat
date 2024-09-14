@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -42,17 +41,12 @@ func (a Auth) LogIn(username, password string) (string, error) {
 
 	u, err := a.User.GetByUsername(username)
 	if err != nil {
-		if _, ok := err.(*repositories.ErrRecordNotFound); !ok {
-			return accessToken, err
-		}
-	}
-	if u.IsNil() {
-		return accessToken, errors.New("No user found with username `" + username + "`")
+		return accessToken, err
 	}
 
 	err = bcrypt.CompareHashAndPassword(u.Password, []byte(password))
 	if err != nil {
-		return "", err
+		return accessToken, err
 	}
 
 	payload := TokenClaims{
@@ -73,23 +67,21 @@ func (a Auth) LogIn(username, password string) (string, error) {
 func (a Auth) Register(user models.User) (models.User, string, error) {
 	var accessToken string
 
-	u, err := a.User.GetByUsername(user.Username)
+	_, err := a.User.GetByUsername(user.Username)
 	if err != nil {
 		if _, ok := err.(*repositories.ErrRecordNotFound); !ok {
 			return user, accessToken, err
 		}
-	}
-	if !u.IsNil() {
+	} else {
 		return user, accessToken, &repositories.ErrDuplicateEntry{Field: "username"}
 	}
 
-	u, err = a.User.GetByEmail(user.Email)
+	_, err = a.User.GetByEmail(user.Email)
 	if err != nil {
 		if _, ok := err.(*repositories.ErrRecordNotFound); !ok {
 			return user, accessToken, err
 		}
-	}
-	if !u.IsNil() {
+	} else {
 		return user, accessToken, &repositories.ErrDuplicateEntry{Field: "email"}
 	}
 
