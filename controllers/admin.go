@@ -2,17 +2,15 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/solsteace/rest/middlewares"
 	"github.com/solsteace/rest/models"
-	"github.com/solsteace/rest/repositories"
 	"github.com/solsteace/rest/services"
 )
 
 type Admin struct {
-	MotelRepo      repositories.Motel
-	MotelAdminRepo repositories.MotelAdmin
-	UserRepo       repositories.User
+	services.MotelManagement
 	services.Auth
 }
 
@@ -51,7 +49,6 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	// TODO: Make transaction
 	userId, err := middlewares.TokenUserId(req.Context())
 	if err != nil {
 		return err
@@ -63,72 +60,62 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
 		Email:         formData.Get("email")}
-	newMotelId, err := a.MotelRepo.Save(motel)
-	if err != nil {
+	admin := models.MotelAdmin{UserID: userId}
+	if err := a.MotelManagement.AddMotel(&motel, &admin); err != nil {
 		return err
 	}
 
-	motel.MotelID = newMotelId
-	motelAdmin := models.MotelAdmin{
-		UserID:  userId,
-		MotelID: int64(motel.MotelID)}
-	newMotelAdminId, err := a.MotelAdminRepo.Save(motelAdmin)
-	if err != nil {
-		return err
-	}
-
-	motelAdmin.AdminID = newMotelAdminId
 	payload := struct {
 		Motel      models.Motel      `json:"motel"`
 		MotelAdmin models.MotelAdmin `json:"motelAdmin"`
-	}{Motel: motel, MotelAdmin: motelAdmin}
+	}{Motel: motel, MotelAdmin: admin}
 	if err := sendResponse(w, http.StatusCreated, payload); err != nil {
 		return err
 	}
 	return nil
 }
 
-// func (a Admin) EditMotelById(w http.ResponseWriter, req *http.Request) error {
-// 	err := req.ParseForm()
-// 	if err != nil {
-// 		return err
-// 	}
+func (a Admin) EditMotelById(w http.ResponseWriter, req *http.Request) error {
+	err := req.ParseForm()
+	if err != nil {
+		return err
+	}
 
-// 	motelId, err := strconv.ParseInt(req.PathValue("id"), 10, 64)
-// 	if err != nil {
-// 		return err
-// 	}
+	motelId, err := strconv.ParseInt(req.PathValue("id"), 10, 64)
+	if err != nil {
+		return err
+	}
 
-// 	formData := req.PostForm
-// 	motel := models.Motel{
-// 		MotelID:       motelId,
-// 		Name:          formData.Get("name"),
-// 		Location:      formData.Get("location"),
-// 		ContactNumber: formData.Get("contactNumber"),
-// 		Email:         formData.Get("email")}
-// 	_, err = a.Motel.EditById(motelId, motel)
-// 	if err != nil {
-// 		return err
-// 	}
+	formData := req.PostForm
+	motel := models.Motel{
+		MotelID:       motelId,
+		Name:          formData.Get("name"),
+		Location:      formData.Get("location"),
+		ContactNumber: formData.Get("contactNumber"),
+		Email:         formData.Get("email")}
+	err = a.MotelManagement.EditById(motelId, motel)
+	if err != nil {
+		return err
+	}
 
-// 	if err := sendResponse(w, http.StatusOK, motel); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+	if err := sendResponse(w, http.StatusOK, motel); err != nil {
+		return err
+	}
+	return nil
+}
 
-// func (a Admin) DeleteMotelById(w http.ResponseWriter, req *http.Request) error {
-// 	motelId, err := strconv.ParseInt(req.PathValue("id"), 10, 64)
-// 	if err != nil {
-// 		return err
-// 	}
+func (a Admin) DeleteMotelById(w http.ResponseWriter, req *http.Request) error {
+	motelId, err := strconv.ParseInt(req.PathValue("id"), 10, 64)
+	if err != nil {
+		return err
+	}
 
-// 	if err := a.Motel.DeleteById(motelId); err != nil {
-// 		return err
-// 	}
+	if err := a.MotelManagement.DeleteMotelById(motelId); err != nil {
+		return err
+	}
 
-// 	if err := sendResponse(w, http.StatusNoContent, nil); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+	if err := sendResponse(w, http.StatusNoContent, nil); err != nil {
+		return err
+	}
+	return nil
+}

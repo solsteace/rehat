@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	repository "github.com/solsteace/rest/repositories"
+	"github.com/solsteace/rest/repositories"
 	"github.com/solsteace/rest/services"
 )
 
@@ -49,14 +49,14 @@ func getProductionMessage(e error) string {
 func getErrStatusCode(e error) int {
 	switch e.(type) {
 	// === 400 BadRequest
-	case *repository.ErrDuplicateEntry:
+	case *repositories.ErrDuplicateEntry:
 		return http.StatusBadRequest
 
 	// === 401 Unauthorized
 	// case *services.ErrDuplicateEntry:
 
 	// === 404 NotFound
-	case *repository.ErrRecordNotFound:
+	case *repositories.ErrRecordNotFound:
 		return http.StatusNotFound
 
 	// === 501 NotImplemented
@@ -64,7 +64,7 @@ func getErrStatusCode(e error) int {
 		return http.StatusNotImplemented
 
 	// === 500 InternalServerError (kept for clarity)
-	case *services.ErrSQL, *repository.ErrSQL:
+	case *repositories.ErrSQL:
 		return http.StatusInternalServerError
 	}
 	return http.StatusInternalServerError

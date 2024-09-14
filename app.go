@@ -25,14 +25,15 @@ func (a *app) init() {
 		User:           userRepo,
 		AccessTokenCfg: a.AccessTokenCfg}
 	profileService := services.Profile{UserRepo: userRepo}
+	MotelManagementService := services.MotelManagement{
+		Motel:      motelRepo,
+		MotelAdmin: motelAdminRepo}
 
 	motel := controllers.Motel{MotelRepo: motelRepo}
 	auth := controllers.Auth{Service: authService}
 	admin := controllers.Admin{
-		MotelRepo:      motelRepo,
-		MotelAdminRepo: motelAdminRepo,
-		UserRepo:       userRepo,
-		Auth:           authService}
+		Auth:            authService,
+		MotelManagement: MotelManagementService}
 	profile := controllers.Profile{Service: profileService}
 
 	motelApi := http.NewServeMux()
@@ -45,8 +46,8 @@ func (a *app) init() {
 
 	adminMotelApi := http.NewServeMux()
 	adminMotelApi.Handle("POST /", mw.HandleError(admin.AddMotel))
-	// adminMotelApi.Handle("PUT /{id}", mw.HandleError(admin.EditMotelById))
-	// adminMotelApi.Handle("DELETE /{id}", mw.HandleError(admin.DeleteMotelById))
+	adminMotelApi.Handle("PUT /{id}", mw.HandleError(admin.EditMotelById))
+	adminMotelApi.Handle("DELETE /{id}", mw.HandleError(admin.DeleteMotelById))
 
 	adminApi := http.NewServeMux()
 	adminApi.Handle("POST /register", mw.HandleError(admin.Register))

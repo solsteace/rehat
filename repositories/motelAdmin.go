@@ -74,3 +74,22 @@ func (m MotelAdmin) DeleteById(id int64) error {
 	}
 	return nil
 }
+
+func (m MotelAdmin) DeleteByMotelId(id int64) error {
+	_, err := m.GetById(id)
+	if err != nil {
+		return err
+	}
+
+	query := "DELETE FROM motel_admins WHERE motel_id=?"
+	stmt, err := m.Db.Prepare(query)
+	if err != nil {
+		return &ErrSQL{message: err.Error()}
+	}
+
+	_, err = stmt.Query(id)
+	if err != nil {
+		return &ErrSQL{message: err.Error()}
+	}
+	return nil
+}

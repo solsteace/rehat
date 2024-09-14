@@ -94,10 +94,10 @@ func (m Motel) Save(motel models.Motel) (int64, error) {
 	return insertId, nil
 }
 
-func (m Motel) EditById(id int64, motel models.Motel) (int64, error) {
+func (m Motel) EditById(id int64, motel models.Motel) error {
 	_, err := m.GetById(id)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	query := `UPDATE motels
@@ -110,7 +110,7 @@ func (m Motel) EditById(id int64, motel models.Motel) (int64, error) {
 					motel_id = ?  `
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
-		return 0, &ErrSQL{message: err.Error()}
+		return &ErrSQL{message: err.Error()}
 	}
 
 	result, err := stmt.Exec(
@@ -120,15 +120,15 @@ func (m Motel) EditById(id int64, motel models.Motel) (int64, error) {
 		motel.Email,
 		motel.MotelID)
 	if err != nil {
-		return 0, &ErrSQL{message: err.Error()}
+		return &ErrSQL{message: err.Error()}
 	}
 
-	affectedRows, err := result.RowsAffected()
+	_, err = result.RowsAffected()
 	if err != nil {
-		return 0, &ErrSQL{message: err.Error()}
+		return &ErrSQL{message: err.Error()}
 	}
 
-	return affectedRows, nil
+	return nil
 }
 
 func (m Motel) DeleteById(id int64) error {
