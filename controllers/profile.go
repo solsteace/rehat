@@ -3,7 +3,6 @@ package controllers
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"github.com/solsteace/rest/middlewares"
 	"github.com/solsteace/rest/models"
@@ -21,7 +20,7 @@ func (p Profile) Index(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	user, err := models.User{}.GetById(p.Db, strconv.FormatInt(userId, 10))
+	user, err := models.User{}.GetById(p.Db, userId)
 	if err != nil {
 		return err
 	}

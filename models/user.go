@@ -51,7 +51,7 @@ func (u User) GetByUsername(db *sql.DB, username string) (User, error) {
 	return user, nil
 }
 
-func (u User) GetById(db *sql.DB, id string) (User, error) {
+func (u User) GetById(db *sql.DB, id int64) (User, error) {
 	var user User
 
 	query := "SELECT * FROM users WHERE user_id=?"
@@ -71,7 +71,7 @@ func (u User) GetById(db *sql.DB, id string) (User, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return user, &ErrRecordNotFound{
-				Message: fmt.Sprintf("Couldn't find user with id %s", id)}
+				Message: fmt.Sprintf("Couldn't find user with id %d", id)}
 		}
 		return user, &ErrSQL{message: err.Error()}
 	}
@@ -134,7 +134,7 @@ func (u User) Save(db *sql.DB) (int64, error) {
 	return insertId, nil
 }
 
-func (u User) EditById(db *sql.DB, id string) (int64, error) {
+func (u User) EditById(db *sql.DB, id int64) (int64, error) {
 	query := `UPDATE users VALUES (?, ?, ?, ?, ?, ?) WHERE id=?`
 	stmt, err := db.Prepare(query)
 	if err != nil {

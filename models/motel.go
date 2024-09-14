@@ -68,7 +68,7 @@ func (m Motel) Save(db *sql.DB) (int64, error) {
 	return insertId, nil
 }
 
-func (m Motel) GetById(db *sql.DB, id string) (Motel, error) {
+func (m Motel) GetById(db *sql.DB, id int64) (Motel, error) {
 	var motel Motel
 
 	query := "SELECT * FROM motels WHERE motel_id=?"
@@ -86,14 +86,14 @@ func (m Motel) GetById(db *sql.DB, id string) (Motel, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return motel, &ErrRecordNotFound{
-				Message: fmt.Sprintf("Couldn't find motel with id %s", id)}
+				Message: fmt.Sprintf("Couldn't find motel with id %d", id)}
 		}
 		return motel, &ErrSQL{message: err.Error()}
 	}
 	return motel, nil
 }
 
-func (m Motel) EditById(db *sql.DB, id string) (int64, error) {
+func (m Motel) EditById(db *sql.DB, id int64) (int64, error) {
 	_, err := m.GetById(db, id)
 	if err != nil {
 		return 0, err
@@ -130,7 +130,7 @@ func (m Motel) EditById(db *sql.DB, id string) (int64, error) {
 	return affectedRows, nil
 }
 
-func (m Motel) DeleteById(db *sql.DB, id string) error {
+func (m Motel) DeleteById(db *sql.DB, id int64) error {
 	_, err := m.GetById(db, id)
 	if err != nil {
 		return err
