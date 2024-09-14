@@ -19,6 +19,7 @@ func (u User) GetByUsername(username string) (models.User, error) {
 	if err != nil {
 		return user, &ErrSQL{message: err.Error()}
 	}
+	defer stmt.Close()
 
 	err = stmt.QueryRow(username).Scan(
 		&user.UserId,
@@ -47,6 +48,7 @@ func (u User) GetById(id int64) (models.User, error) {
 	if err != nil {
 		return user, &ErrSQL{message: err.Error()}
 	}
+	defer stmt.Close()
 
 	err = stmt.QueryRow(id).Scan(
 		&user.UserId,
@@ -75,6 +77,7 @@ func (u User) GetByEmail(email string) (models.User, error) {
 	if err != nil {
 		return user, &ErrSQL{message: err.Error()}
 	}
+	defer stmt.Close()
 
 	err = stmt.QueryRow(email).Scan(
 		&user.UserId,
@@ -102,6 +105,7 @@ func (u User) Save(user models.User) (int64, error) {
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
 	}
+	defer stmt.Close()
 
 	result, err := stmt.Exec(
 		user.Username,
@@ -128,6 +132,7 @@ func (u User) EditById(id int64, user models.User) (int64, error) {
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
 	}
+	defer stmt.Close()
 
 	result, err := stmt.Exec(
 		user.Username,

@@ -106,7 +106,7 @@ func (a Admin) EditMotelById(w http.ResponseWriter, req *http.Request) error {
 		Email:         formData.Get("email"),
 		Rating:        motelRating}
 
-	if err := a.MotelManagement.EditById(userId, motelId, &motel); err != nil {
+	if err := a.MotelManagement.EditById(motelId, userId, &motel); err != nil {
 		return err
 	}
 
@@ -127,7 +127,7 @@ func (a Admin) DeleteMotelById(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := a.MotelManagement.DeleteById(userId, motelId); err != nil {
+	if err := a.MotelManagement.DeleteById(motelId, userId); err != nil {
 		return err
 	}
 

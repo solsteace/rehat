@@ -50,6 +50,7 @@ func (m Motel) GetById(id int64) (models.Motel, error) {
 	if err != nil {
 		return motel, &ErrSQL{message: err.Error()}
 	}
+	defer stmt.Close()
 
 	err = stmt.QueryRow(id).Scan(
 		&motel.MotelID,
@@ -76,6 +77,7 @@ func (m Motel) Save(motel models.Motel) (int64, error) {
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
 	}
+	defer stmt.Close()
 
 	result, err := stmt.Exec(
 		motel.Name,
@@ -114,6 +116,7 @@ func (m Motel) EditById(id int64, motel models.Motel) error {
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
 	}
+	defer stmt.Close()
 
 	result, err := stmt.Exec(
 		motel.Name,
@@ -145,6 +148,7 @@ func (m Motel) DeleteById(id int64) error {
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
 	}
+	defer stmt.Close()
 
 	_, err = stmt.Query(id)
 	if err != nil {
