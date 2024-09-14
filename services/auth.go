@@ -1,12 +1,12 @@
 package services
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/solsteace/rest/models"
+	"github.com/solsteace/rest/repositories"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,15 +19,15 @@ func (e ErrAccessToken) Error() string {
 }
 
 type (
+	Auth struct {
+		AccessTokenCfg
+		repositories.User
+	}
+
 	AccessTokenCfg struct {
 		SignMethod jwt.SigningMethod // TODO: Explore more about signing method
 		Lifetime   time.Duration
 		Secret     string
-	}
-
-	Auth struct {
-		AccessTokenCfg
-		Db *sql.DB
 	}
 
 	TokenClaims struct {
@@ -40,10 +40,9 @@ type (
 func (a Auth) LogIn(username, password string) (string, error) {
 	var accessToken string
 
-	u := models.User{}
-	u, err := u.GetByUsername(a.Db, username)
+	u, err := a.User.GetByUsername(username)
 	if err != nil {
-		if _, ok := err.(*models.ErrRecordNotFound); !ok {
+		if _, ok := err.(*repositories.ErrRecordNotFound); !ok {
 			return accessToken, err
 		}
 	}
@@ -74,25 +73,24 @@ func (a Auth) LogIn(username, password string) (string, error) {
 func (a Auth) Register(user models.User) (models.User, string, error) {
 	var accessToken string
 
-	u := models.User{}
-	u, err := u.GetByUsername(a.Db, user.Username)
+	u, err := a.User.GetByUsername(user.Username)
 	if err != nil {
-		if _, ok := err.(*models.ErrRecordNotFound); !ok {
+		if _, ok := err.(*repositories.ErrRecordNotFound); !ok {
 			return user, accessToken, err
 		}
 	}
 	if !u.IsNil() {
-		return user, accessToken, &models.ErrDuplicateEntry{Field: "username"}
+		return user, accessToken, &repositories.ErrDuplicateEntry{Field: "username"}
 	}
 
-	u, err = u.GetByEmail(a.Db, user.Email)
+	u, err = a.User.GetByEmail(user.Email)
 	if err != nil {
-		if _, ok := err.(*models.ErrRecordNotFound); !ok {
+		if _, ok := err.(*repositories.ErrRecordNotFound); !ok {
 			return user, accessToken, err
 		}
 	}
 	if !u.IsNil() {
-		return user, accessToken, &models.ErrDuplicateEntry{Field: "email"}
+		return user, accessToken, &repositories.ErrDuplicateEntry{Field: "email"}
 	}
 
 	hash, err := bcrypt.GenerateFromPassword(user.Password, bcrypt.DefaultCost)
@@ -101,7 +99,7 @@ func (a Auth) Register(user models.User) (models.User, string, error) {
 	}
 
 	user.Password = hash
-	insertId, err := user.Save(a.Db)
+	insertId, err := a.User.Save(user)
 	if err != nil {
 		return user, accessToken, err
 	}

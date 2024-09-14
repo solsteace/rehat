@@ -1,20 +1,18 @@
 package controllers
 
 import (
-	"database/sql"
 	"net/http"
 	"strconv"
 
-	"github.com/solsteace/rest/models"
+	"github.com/solsteace/rest/repositories"
 )
 
 type Motel struct {
-	Db *sql.DB
+	MotelRepo repositories.Motel
 }
 
 func (m Motel) GetAll(w http.ResponseWriter, req *http.Request) error {
-	motel := models.Motel{}
-	motels, err := motel.GetAll(m.Db)
+	motels, err := m.MotelRepo.GetAll()
 	if err != nil {
 		return err
 	}
@@ -31,8 +29,7 @@ func (m Motel) GetById(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	motel := models.Motel{}
-	motel, err = motel.GetById(m.Db, motelId)
+	motel, err := m.MotelRepo.GetById(motelId)
 	if err != nil {
 		return err
 	}

@@ -1,16 +1,13 @@
 package controllers
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/solsteace/rest/middlewares"
-	"github.com/solsteace/rest/models"
 	"github.com/solsteace/rest/services"
 )
 
 type Profile struct {
-	Db      *sql.DB
 	Service services.Profile
 }
 
@@ -20,7 +17,7 @@ func (p Profile) Index(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	user, err := models.User{}.GetById(p.Db, userId)
+	user, err := p.Service.Index(userId)
 	if err != nil {
 		return err
 	}

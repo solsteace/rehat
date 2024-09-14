@@ -6,6 +6,7 @@ import (
 
 	"github.com/solsteace/rest/controllers"
 	mw "github.com/solsteace/rest/middlewares"
+	"github.com/solsteace/rest/repositories"
 	"github.com/solsteace/rest/services"
 )
 
@@ -16,18 +17,32 @@ type app struct {
 }
 
 func (a *app) init() {
-	motel := controllers.Motel{Db: a.db}
+	userRepo := repositories.User{Db: a.db}
+	motelRepo := repositories.Motel{Db: a.db}
+	motelAdminRepo := repositories.MotelAdmin{Db: a.db}
+
+	authService := services.Auth{
+		User:           userRepo,
+		AccessTokenCfg: a.AccessTokenCfg}
+	profileService := services.Profile{UserRepo: userRepo}
+
+	motel := controllers.Motel{MotelRepo: motelRepo}
+	auth := controllers.Auth{Service: authService}
+	admin := controllers.Admin{
+		MotelRepo:      motelRepo,
+		MotelAdminRepo: motelAdminRepo,
+		UserRepo:       userRepo,
+		Auth:           authService}
+	profile := controllers.Profile{Service: profileService}
+
 	motelApi := http.NewServeMux()
 	motelApi.Handle("GET /{id}", mw.HandleError(motel.GetById))
 	motelApi.Handle("GET /", mw.HandleError(motel.GetAll))
 
-	authService := services.Auth{Db: a.db, AccessTokenCfg: a.AccessTokenCfg}
-	auth := controllers.Auth{Service: authService}
 	authApi := http.NewServeMux()
 	authApi.Handle("POST /login", mw.HandleError(auth.LogIn))
 	authApi.Handle("POST /register", mw.HandleError(auth.Register))
 
-	admin := controllers.Admin{Db: a.db, Auth: authService}
 	adminMotelApi := http.NewServeMux()
 	adminMotelApi.Handle("POST /", mw.HandleError(admin.AddMotel))
 	// adminMotelApi.Handle("PUT /{id}", mw.HandleError(admin.EditMotelById))
@@ -39,8 +54,6 @@ func (a *app) init() {
 		"POST /motels/",
 		http.StripPrefix("/motels", mw.Jwt(mw.Admin(adminMotelApi))))
 
-	profileService := services.Profile{}
-	profile := controllers.Profile{Db: a.db, Service: profileService}
 	profileApi := http.NewServeMux()
 	profileApi.Handle("/", mw.HandleError(profile.Index))
 
