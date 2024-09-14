@@ -16,6 +16,7 @@ type app struct {
 	services.AccessTokenCfg
 }
 
+// Initializes apps by setting up routes, handlers, services, and more.
 func (a *app) init() {
 	userRepo := repositories.User{Db: a.db}
 	motelRepo := repositories.Motel{Db: a.db}

@@ -12,6 +12,8 @@ type payload struct {
 	Data   interface{} `json:"data"`
 }
 
+// Sends error message to the client with specified `statusCode`. `reason` could
+// be used to provide information to the client regarding the reason of failure
 func sendError(w http.ResponseWriter, statusCode int, reason interface{}) error {
 	if http.StatusText(statusCode) == "" {
 		message := fmt.Sprintf("Status code unknown: %d", statusCode)

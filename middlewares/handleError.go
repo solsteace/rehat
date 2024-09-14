@@ -11,6 +11,9 @@ import (
 
 type routeHandler func(w http.ResponseWriter, req *http.Request) error
 
+// Handles error that returned by the route handler, if there's any.
+// The error received would be analyzed to determine appropiate response to be
+// sent to the client
 func HandleError(handler routeHandler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, req *http.Request) {
@@ -38,7 +41,7 @@ func HandleError(handler routeHandler) http.Handler {
 	)
 }
 
-// Might be useful in production for more user-friendly response
+// Produces more user-friendly error message (Might be useful in production)
 func getProductionMessage(e error) string {
 	switch e.(type) {
 	// TODO: Complete
@@ -46,6 +49,7 @@ func getProductionMessage(e error) string {
 	return ""
 }
 
+// Defines appropiate status code given the error received
 func getErrStatusCode(e error) int {
 	switch e.(type) {
 	// === 400 BadRequest

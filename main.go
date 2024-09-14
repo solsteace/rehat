@@ -22,18 +22,17 @@ func main() {
 		log.Fatalf("`JWT_LIFETIME` should be an integer")
 	}
 
-	app := app{
-		AccessTokenCfg: services.AccessTokenCfg{
-			SignMethod: jwt.SigningMethodHS256,
-			Lifetime:   time.Minute * time.Duration(jwtLifetime),
-			Secret:     os.Getenv("JWT_SECRET")}}
-
 	db, err := initDB()
 	if err != nil {
 		log.Fatalf("Something went wrong during database setup: \n%s", err)
 	}
-	app.db = db
 
+	app := app{
+		db: db,
+		AccessTokenCfg: services.AccessTokenCfg{
+			SignMethod: jwt.SigningMethodHS256,
+			Lifetime:   time.Minute * time.Duration(jwtLifetime),
+			Secret:     os.Getenv("JWT_SECRET")}}
 	app.init()
 	server := http.Server{
 		Addr:    fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT")),
@@ -42,10 +41,11 @@ func main() {
 
 	log.Printf("Running server in port %s...", os.Getenv("PORT"))
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("Something went wrong when trying to running the server: \n%s", err)
+		log.Fatalf("Something went wrong when trying to run the server: \n%s", err)
 	}
 }
 
+// Establishes database connection with given configuration in `.env`
 func initDB() (*sql.DB, error) {
 	var conn *sql.DB
 	config := mysql.Config{

@@ -21,6 +21,12 @@ type (
 
 const tokenKey middlewareKey = "token"
 
+// Checks for JWT in the `authorization` header. If it's not present, an error
+// message would be sent.
+//
+// Upon checking, if the content is appropiate, it would be decoded and stored
+// in requests' context. An error message would be sent when the decoding process
+// is failed
 func Jwt(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, req *http.Request) {
