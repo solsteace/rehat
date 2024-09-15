@@ -9,7 +9,8 @@ CREATE TABLE `users` (
     `name` VARCHAR(63),
     `password` VARBINARY(63),
     `role` ENUM("superadmin", "admin", "customer") DEFAULT "customer",
-    `active` BOOLEAN DEFAULT TRUE
+    `verified` BOOLEAN DEFAULT FALSE,
+    `deleted_at` DATETIME DEFAULT NULL
 );
 
 CREATE TABLE `motels` (
@@ -17,37 +18,55 @@ CREATE TABLE `motels` (
     `name` VARCHAR(100),
     `location` VARCHAR(255),
     `contact_number` VARCHAR(15),
-    `email` VARCHAR(100),
-    `rating` INT(1)
+    `email` VARCHAR(100)
 );
 
 CREATE TABLE `motel_admins` (
     `admin_id` INT PRIMARY KEY AUTO_INCREMENT,
-    `user_id` INT NOT NULL,
-    `motel_id` INT NOT NULL,
+    `user_id` INT,
+    `motel_id` INT,
 
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
-    FOREIGN KEY (`motel_id`) REFERENCES `motels`(`motel_id`)
+    FOREIGN KEY (`user_id`) 
+        REFERENCES `users`(`user_id`) 
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (`motel_id`) 
+        REFERENCES `motels`(`motel_id`) 
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
 );
 
-CREATE TABLE  `classes`(
+
+CREATE TABLE  `room_classes`(
     `class_id` INT PRIMARY KEY AUTO_INCREMENT,
     `motel_id` INT,
-    `class_name` VARCHAR(15),
+    `name` VARCHAR(15),
     `price` INT,
-    FOREIGN KEY (`motel_id`) REFERENCES `motels`(`motel_id`)
+
+    FOREIGN KEY (`motel_id`) 
+        REFERENCES `motels`(`motel_id`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 CREATE TABLE `rooms` (
     `room_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `motel_id` INT,
     `class_id` INT,
     `room_number` INT,
     `status` ENUM("open", "reserved", "maintenance") DEFAULT "open",
 
-    FOREIGN KEY (`class_id`) REFERENCES `classes`(`class_id`)
+    FOREIGN KEY (`class_id`) 
+        REFERENCES `room_classes`(`class_id`)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    FOREIGN KEY (`motel_id`) 
+        REFERENCES `motels`(`motel_id`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
-CREATE TABLE `reservation` (
+CREATE TABLE `reservations` (
     `reservation_id` INT PRIMARY KEY AUTO_INCREMENT,
     `room_id` INT,
     `user_id` INT,
@@ -56,6 +75,12 @@ CREATE TABLE `reservation` (
     `checkout` DATETIME,
     `total` INT,
 
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
-    FOREIGN KEY (`room_id`) REFERENCES `rooms`(`room_id`)
+    FOREIGN KEY (`user_id`) 
+        REFERENCES `users`(`user_id`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (`room_id`) 
+        REFERENCES `rooms`(`room_id`)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
 );
