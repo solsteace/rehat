@@ -5,3 +5,5 @@ type MotelAdmin struct {
 	UserID  int64 `json:"user_id" db:"user_id"`
 	MotelID int64 `json:"motel_id" db:"motel_id"`
 }
+
+func (ma MotelAdmin) TableName() string { return "motel_admins" }

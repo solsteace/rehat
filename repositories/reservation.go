@@ -13,7 +13,9 @@ type Reservation struct {
 
 func (r Reservation) GetAll() ([]models.Reservation, error) {
 	var reservations []models.Reservation
-	query := "SELECT * FROM reservations"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s",
+		models.Reservation{}.TableName())
 	rows, err := r.Db.Query(query)
 	if err != nil {
 		return reservations, &ErrSQL{message: err.Error()}
@@ -45,7 +47,9 @@ func (r Reservation) GetAll() ([]models.Reservation, error) {
 
 func (r Reservation) GetById(id int64) (models.Reservation, error) {
 	var reservation models.Reservation
-	query := "SELECT * FROM reservations WHERE id=?"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s WHERE id=?",
+		reservation.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return reservation, &ErrSQL{message: err.Error()}
@@ -70,10 +74,12 @@ func (r Reservation) GetById(id int64) (models.Reservation, error) {
 }
 
 func (r Reservation) Save(reservation *models.Reservation) error {
-	query := `INSERT 
-				INTO reservations( room_id, user_id, reserve_start, 
-					reserve_end, checkout, total) 
-				VALUES (?, ?, ?, ?, ?, ?)`
+	query := fmt.Sprintf(
+		`INSERT 
+			INTO %s( room_id, user_id, reserve_start, 
+				reserve_end, checkout, total) 
+			VALUES (?, ?, ?, ?, ?, ?)`,
+		reservation.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
@@ -101,17 +107,16 @@ func (r Reservation) Save(reservation *models.Reservation) error {
 }
 
 func (r Reservation) EditById(id int64, reservation *models.Reservation) error {
-	query := `UPDATE reservations
-				SET 
-					room_id = ?, 
-					user_id = ?, 
-					reserve_start = ?, 
-					reserve_end = ?, 
-					checkout = ?, 
-					total = ?
-				WHERE 
-					reservation_id = ?`
-
+	query := fmt.Sprintf(
+		`UPDATE %s
+			SET room_id = ?, 
+				user_id = ?, 
+				reserve_start = ?, 
+				reserve_end = ?, 
+				checkout = ?, 
+				total = ?
+			WHERE reservation_id = ?`,
+		reservation.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
@@ -138,7 +143,14 @@ func (r Reservation) EditById(id int64, reservation *models.Reservation) error {
 }
 
 func (r Reservation) DeleteById(id int64) error {
-	query := "DELETE FROM reservations WHERE id=?"
+	reservation, err := r.GetById(id)
+	if err != nil {
+		return err
+	}
+
+	query := fmt.Sprintf(
+		"DELETE FROM %s WHERE id=?",
+		reservation.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}

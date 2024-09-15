@@ -21,6 +21,9 @@ func (a *app) init() {
 	userRepo := repositories.User{Db: a.db}
 	motelRepo := repositories.Motel{Db: a.db}
 	motelAdminRepo := repositories.MotelAdmin{Db: a.db}
+	reservationRepo := repositories.Reservation{Db: a.db}
+	roomRepo := repositories.Room{Db: a.db}
+	classRepo := repositories.Class{Db: a.db}
 
 	authService := services.Auth{
 		User:           userRepo,
@@ -29,6 +32,11 @@ func (a *app) init() {
 	MotelManagementService := services.MotelManagement{
 		Motel:      motelRepo,
 		MotelAdmin: motelAdminRepo}
+	reservationService := services.Reservation{
+		Room:        roomRepo,
+		Reservation: reservationRepo,
+		Class:       classRepo,
+	}
 
 	motel := controllers.Motel{MotelRepo: motelRepo}
 	auth := controllers.Auth{Service: authService}
@@ -36,6 +44,7 @@ func (a *app) init() {
 		Auth:            authService,
 		MotelManagement: MotelManagementService}
 	profile := controllers.Profile{Service: profileService}
+	reservation := controllers.Reservation{Service: reservationService}
 
 	motelApi := http.NewServeMux()
 	motelApi.Handle("GET /{id}", mw.HandleError(motel.GetById))
@@ -46,8 +55,8 @@ func (a *app) init() {
 	authApi.Handle("POST /register", mw.HandleError(auth.Register))
 
 	adminMotelApi := http.NewServeMux()
-	adminMotelApi.Handle("PUT /{id}", mw.HandleError(admin.EditMotelById))
-	adminMotelApi.Handle("DELETE /{id}", mw.HandleError(admin.DeleteMotelById))
+	adminMotelApi.Handle("PUT /{id}", mw.HandleError(admin.EditMotel))
+	adminMotelApi.Handle("DELETE /{id}", mw.HandleError(admin.DeleteMotel))
 	adminMotelApi.Handle("POST /", mw.HandleError(admin.AddMotel))
 
 	adminApi := http.NewServeMux()
@@ -59,11 +68,17 @@ func (a *app) init() {
 	profileApi := http.NewServeMux()
 	profileApi.Handle("/", mw.HandleError(profile.Index))
 
+	reservationApi := http.NewServeMux()
+	reservationApi.Handle("PUT /{id}", mw.HandleError(reservation.EditById))
+	reservationApi.Handle("DELETE /{id}", mw.HandleError(reservation.DeleteById))
+	reservationApi.Handle("POST /", mw.HandleError(reservation.Add))
+
 	api := http.NewServeMux()
 	api.Handle("/motels/", http.StripPrefix("/motels", motelApi))
 	api.Handle("/auth/", http.StripPrefix("/auth", authApi))
 	api.Handle("/admin/", http.StripPrefix("/admin", adminApi))
 	api.Handle("/profile/", http.StripPrefix("/profile", mw.Jwt(profileApi)))
+	api.Handle("/reservation/", http.StripPrefix("/reservation", mw.Jwt(reservationApi)))
 
 	router := http.NewServeMux()
 	router.Handle(

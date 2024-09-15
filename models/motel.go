@@ -6,5 +6,6 @@ type Motel struct {
 	Location      string `json:"location" db:"location"`
 	ContactNumber string `json:"contact_number" db:"contact_number"`
 	Email         string `json:"email" db:"email"`
-	Rating        int    `json:"rating" db:"rating"`
 }
+
+func (m Motel) TableName() string { return "motels" }

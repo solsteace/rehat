@@ -44,8 +44,7 @@ func (a Auth) Register(w http.ResponseWriter, req *http.Request) error {
 		Username: formData.Get("username"),
 		Password: []byte(formData.Get("password")),
 		Email:    formData.Get("email"),
-		Role:     "customer",
-		IsActive: true}
+		Role:     "customer"}
 	newUser, accessToken, err := a.Service.Register(newUser)
 	if err != nil {
 		return err

@@ -13,7 +13,9 @@ type Motel struct {
 
 func (m Motel) GetAll() ([]models.Motel, error) {
 	var motels []models.Motel
-	query := "SELECT * FROM motels"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s",
+		models.Motel{}.TableName())
 	rows, err := m.Db.Query(query)
 	if err != nil {
 		return motels, &ErrSQL{message: err.Error()}
@@ -27,8 +29,7 @@ func (m Motel) GetAll() ([]models.Motel, error) {
 			&motel.Name,
 			&motel.Location,
 			&motel.ContactNumber,
-			&motel.Email,
-			&motel.Rating)
+			&motel.Email)
 		if err != nil {
 			return motels, &ErrSQL{message: err.Error()}
 		}
@@ -45,7 +46,9 @@ func (m Motel) GetAll() ([]models.Motel, error) {
 func (m Motel) GetById(id int64) (models.Motel, error) {
 	var motel models.Motel
 
-	query := "SELECT * FROM motels WHERE motel_id=?"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s WHERE motel_id=?",
+		motel.TableName())
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
 		return motel, &ErrSQL{message: err.Error()}
@@ -57,9 +60,7 @@ func (m Motel) GetById(id int64) (models.Motel, error) {
 		&motel.Name,
 		&motel.Location,
 		&motel.ContactNumber,
-		&motel.Email,
-		&motel.Rating,
-	)
+		&motel.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return motel, &ErrRecordNotFound{
@@ -71,8 +72,11 @@ func (m Motel) GetById(id int64) (models.Motel, error) {
 }
 
 func (m Motel) Save(motel models.Motel) (int64, error) {
-	query := `INSERT INTO motels(name, location, contact_number, email, rating) 
-				VALUES (?, ?, ?, ?, ?)`
+	query := fmt.Sprintf(
+		`INSERT 
+			INTO %s(name, location, contact_number, email) 
+			VALUES (?, ?, ?, ?)`,
+		motel.TableName())
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
@@ -83,8 +87,7 @@ func (m Motel) Save(motel models.Motel) (int64, error) {
 		motel.Name,
 		motel.Location,
 		motel.ContactNumber,
-		motel.Email,
-		motel.Rating)
+		motel.Email)
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
 	}
@@ -103,15 +106,15 @@ func (m Motel) EditById(id int64, motel models.Motel) error {
 		return err
 	}
 
-	query := `UPDATE motels
-				SET
-					name = ?, 
-					location = ?, 
-					contact_number = ?, 
-					email = ?,
-					rating = ?
-				WHERE 
-					motel_id = ?  `
+	query := fmt.Sprintf(
+		`UPDATE %s
+			SET name = ?, 
+				location = ?, 
+				contact_number = ?, 
+				email = ?,
+				rating = ?
+			WHERE motel_id = ?`,
+		motel.TableName())
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
@@ -123,7 +126,6 @@ func (m Motel) EditById(id int64, motel models.Motel) error {
 		motel.Location,
 		motel.ContactNumber,
 		motel.Email,
-		motel.Rating,
 		motel.MotelID)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
@@ -138,12 +140,14 @@ func (m Motel) EditById(id int64, motel models.Motel) error {
 }
 
 func (m Motel) DeleteById(id int64) error {
-	_, err := m.GetById(id)
+	motel, err := m.GetById(id)
 	if err != nil {
 		return err
 	}
 
-	query := "DELETE FROM motels WHERE motel_id=?"
+	query := fmt.Sprintf(
+		"DELETE FROM %s WHERE motel_id=?",
+		motel.TableName())
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}

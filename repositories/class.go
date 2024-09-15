@@ -11,9 +11,11 @@ type Class struct {
 	Db *sql.DB
 }
 
-func (r Class) GetAll() ([]models.Class, error) {
-	var classes []models.Class
-	query := "SELECT * FROM classes"
+func (r Class) GetAll() ([]models.RoomClass, error) {
+	var classes []models.RoomClass
+	query := fmt.Sprintf(
+		"SELECT * FROM %s",
+		models.RoomClass{}.TableName())
 	rows, err := r.Db.Query(query)
 	if err != nil {
 		return classes, &ErrSQL{message: err.Error()}
@@ -21,7 +23,7 @@ func (r Class) GetAll() ([]models.Class, error) {
 
 	defer rows.Close()
 	for rows.Next() {
-		var class models.Class
+		var class models.RoomClass
 		err := rows.Scan(
 			&class.MotelID,
 			&class.Name,
@@ -40,9 +42,11 @@ func (r Class) GetAll() ([]models.Class, error) {
 	return classes, nil
 }
 
-func (r Class) GetById(id int64) (models.Class, error) {
-	var class models.Class
-	query := "SELECT * FROM classes WHERE id=?"
+func (r Class) GetById(id int64) (models.RoomClass, error) {
+	var class models.RoomClass
+	query := fmt.Sprintf(
+		"SELECT * FROM %s WHERE id=?",
+		class.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return class, &ErrSQL{message: err.Error()}
@@ -63,8 +67,10 @@ func (r Class) GetById(id int64) (models.Class, error) {
 	return class, nil
 }
 
-func (r Class) Save(class *models.Class) error {
-	query := `INSERT INTO classes(motel_id, name, price) VALUES (?, ?, ?)`
+func (r Class) Save(class *models.RoomClass) error {
+	query := fmt.Sprintf(
+		`INSERT INTO %s(motel_id, name, price) VALUES (?, ?, ?)`,
+		class.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
@@ -88,15 +94,14 @@ func (r Class) Save(class *models.Class) error {
 	return nil
 }
 
-func (r Class) EditById(id int64, class *models.Class) error {
-	query := `UPDATE classes
-				SET
-					motel_id = ?, 
-					name = ?, 
-					price = ?
-				WHERE 
-					class_id = ?`
-
+func (r Class) EditById(id int64, class *models.RoomClass) error {
+	query := fmt.Sprintf(
+		`UPDATE %s
+			SET motel_id = ?, 
+				name = ?, 
+				price = ?
+			WHERE class_id = ?`,
+		class.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
@@ -120,7 +125,14 @@ func (r Class) EditById(id int64, class *models.Class) error {
 }
 
 func (r Class) DeleteById(id int64) error {
-	query := "DELETE FROM classes WHERE id=?"
+	class, err := r.GetById(id)
+	if err != nil {
+		return err
+	}
+
+	query := fmt.Sprintf(
+		"DELETE FROM %s WHERE id=?",
+		class.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}

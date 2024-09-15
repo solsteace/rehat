@@ -14,7 +14,9 @@ type User struct {
 func (u User) GetByUsername(username string) (models.User, error) {
 	var user models.User
 
-	query := "SELECT * FROM users WHERE username=?"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s WHERE username=?",
+		user.TableName())
 	stmt, err := u.Db.Prepare(query)
 	if err != nil {
 		return user, &ErrSQL{message: err.Error()}
@@ -28,7 +30,8 @@ func (u User) GetByUsername(username string) (models.User, error) {
 		&user.Name,
 		&user.Password,
 		&user.Role,
-		&user.IsActive)
+		&user.IsVerified,
+		&user.DeletedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return user, &ErrRecordNotFound{
@@ -43,7 +46,9 @@ func (u User) GetByUsername(username string) (models.User, error) {
 func (u User) GetById(id int64) (models.User, error) {
 	var user models.User
 
-	query := "SELECT * FROM users WHERE user_id=?"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s WHERE user_id=?",
+		user.TableName())
 	stmt, err := u.Db.Prepare(query)
 	if err != nil {
 		return user, &ErrSQL{message: err.Error()}
@@ -57,7 +62,8 @@ func (u User) GetById(id int64) (models.User, error) {
 		&user.Name,
 		&user.Password,
 		&user.Role,
-		&user.IsActive)
+		&user.IsVerified,
+		&user.DeletedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return user, &ErrRecordNotFound{
@@ -72,7 +78,9 @@ func (u User) GetById(id int64) (models.User, error) {
 func (u User) GetByEmail(email string) (models.User, error) {
 	var user models.User
 
-	query := "SELECT * FROM users WHERE email=?"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s WHERE email=?",
+		user.TableName())
 	stmt, err := u.Db.Prepare(query)
 	if err != nil {
 		return user, &ErrSQL{message: err.Error()}
@@ -86,7 +94,8 @@ func (u User) GetByEmail(email string) (models.User, error) {
 		&user.Name,
 		&user.Password,
 		&user.Role,
-		&user.IsActive)
+		&user.IsVerified,
+		&user.DeletedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return user, &ErrRecordNotFound{
@@ -99,8 +108,11 @@ func (u User) GetByEmail(email string) (models.User, error) {
 }
 
 func (u User) Save(user models.User) (int64, error) {
-	query := `INSERT INTO users(username, name, password, email, role, active) 
-				VALUES (?, ?, ?, ?, ?, ?)`
+	query := fmt.Sprintf(
+		`INSERT 
+			INTO %s(username, name, password, email, role) 
+			VALUES (?, ?, ?, ?, ?)`,
+		user.TableName())
 	stmt, err := u.Db.Prepare(query)
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
@@ -112,8 +124,7 @@ func (u User) Save(user models.User) (int64, error) {
 		user.Name,
 		user.Password,
 		user.Email,
-		user.Role,
-		user.IsActive)
+		user.Role)
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
 	}
@@ -127,7 +138,15 @@ func (u User) Save(user models.User) (int64, error) {
 }
 
 func (u User) EditById(id int64, user models.User) (int64, error) {
-	query := `UPDATE users VALUES (?, ?, ?, ?, ?, ?) WHERE id=?`
+	query := fmt.Sprintf(
+		`UPDATE %s 
+			SET email = ?,
+				username = ?,
+				name = ?,
+				password = ?,
+				role = ?
+			WHERE id = ?`,
+		user.TableName())
 	stmt, err := u.Db.Prepare(query)
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}
@@ -140,7 +159,6 @@ func (u User) EditById(id int64, user models.User) (int64, error) {
 		user.Password,
 		user.Email,
 		user.Role,
-		user.IsActive,
 		user.UserId)
 	if err != nil {
 		return 0, &ErrSQL{message: err.Error()}

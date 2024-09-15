@@ -35,33 +35,37 @@ func (m MotelAdmin) Save(admin models.MotelAdmin) (int64, error) {
 }
 
 func (m MotelAdmin) GetById(id int64) (models.MotelAdmin, error) {
-	var motel models.MotelAdmin
+	var admin models.MotelAdmin
 
-	query := "SELECT * FROM motel_admins WHERE admin_id=?"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s WHERE admin_id=?",
+		admin.TableName())
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
-		return motel, &ErrSQL{message: err.Error()}
+		return admin, &ErrSQL{message: err.Error()}
 	}
 	defer stmt.Close()
 
 	err = stmt.QueryRow(id).Scan(
-		&motel.AdminID,
-		&motel.UserID,
-		&motel.MotelID)
+		&admin.AdminID,
+		&admin.UserID,
+		&admin.MotelID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return motel, &ErrRecordNotFound{
+			return admin, &ErrRecordNotFound{
 				Message: fmt.Sprintf("Couldn't find motel admin with id %d", id)}
 		}
-		return motel, &ErrSQL{message: err.Error()}
+		return admin, &ErrSQL{message: err.Error()}
 	}
-	return motel, nil
+	return admin, nil
 }
 
 func (m MotelAdmin) GetByUserAndMotelId(userId, motelId int64) (models.MotelAdmin, error) {
 	var admin models.MotelAdmin
 
-	query := "SELECT * FROM motel_admins WHERE user_id=? AND motel_id=?"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s WHERE user_id=? AND motel_id=?",
+		admin.TableName())
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
 		return admin, &ErrSQL{message: err.Error()}
@@ -86,12 +90,14 @@ func (m MotelAdmin) GetByUserAndMotelId(userId, motelId int64) (models.MotelAdmi
 }
 
 func (m MotelAdmin) DeleteById(id int64) error {
-	_, err := m.GetById(id)
+	admin, err := m.GetById(id)
 	if err != nil {
 		return err
 	}
 
-	query := "DELETE FROM motel_admins WHERE admin_id=?"
+	query := fmt.Sprintf(
+		"DELETE FROM %s WHERE admin_id=?",
+		admin.TableName())
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
@@ -106,12 +112,14 @@ func (m MotelAdmin) DeleteById(id int64) error {
 }
 
 func (m MotelAdmin) DeleteByMotelId(id int64) error {
-	_, err := m.GetById(id)
+	admin, err := m.GetById(id)
 	if err != nil {
 		return err
 	}
 
-	query := "DELETE FROM motel_admins WHERE motel_id=?"
+	query := fmt.Sprintf(
+		"DELETE FROM %s WHERE motel_id=?",
+		admin.TableName())
 	stmt, err := m.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}

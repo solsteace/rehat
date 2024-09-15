@@ -13,7 +13,9 @@ type Room struct {
 
 func (r Room) GetAll() ([]models.Room, error) {
 	var rooms []models.Room
-	query := "SELECT * FROM rooms"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s",
+		models.Room{}.TableName())
 	rows, err := r.Db.Query(query)
 	if err != nil {
 		return rooms, &ErrSQL{message: err.Error()}
@@ -43,7 +45,9 @@ func (r Room) GetAll() ([]models.Room, error) {
 
 func (r Room) GetById(id int64) (models.Room, error) {
 	var room models.Room
-	query := "SELECT * FROM rooms WHERE id=?"
+	query := fmt.Sprintf(
+		"SELECT * FROM %s WHERE id=?",
+		room.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return room, &ErrSQL{message: err.Error()}
@@ -66,7 +70,9 @@ func (r Room) GetById(id int64) (models.Room, error) {
 }
 
 func (r Room) Save(room *models.Room) error {
-	query := `INSERT INTO rooms(class_id, room_number, status) VALUES (?, ?, ?)`
+	query := fmt.Sprintf(
+		`INSERT INTO %s(class_id, room_number, status) VALUES (?, ?, ?)`,
+		room.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
@@ -91,14 +97,13 @@ func (r Room) Save(room *models.Room) error {
 }
 
 func (r Room) EditById(id int64, room *models.Room) error {
-	query := `UPDATE rooms
-				SET
-					class_id = ?, 
-					room_number = ?, 
-					status = ?
-				WHERE 
-					room_id = ?`
-
+	query := fmt.Sprintf(
+		`UPDATE %s
+			SET class_id = ?, 
+				room_number = ?, 
+				status = ?
+			WHERE room_id = ?`,
+		room.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}
@@ -122,7 +127,14 @@ func (r Room) EditById(id int64, room *models.Room) error {
 }
 
 func (r Room) DeleteById(id int64) error {
-	query := "DELETE FROM rooms WHERE id=?"
+	room, err := r.GetById(id)
+	if err != nil {
+		return err
+	}
+
+	query := fmt.Sprintf(
+		"DELETE FROM %s WHERE id=?",
+		room.TableName())
 	stmt, err := r.Db.Prepare(query)
 	if err != nil {
 		return &ErrSQL{message: err.Error()}

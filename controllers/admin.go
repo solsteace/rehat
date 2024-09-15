@@ -26,8 +26,7 @@ func (a Admin) Register(w http.ResponseWriter, req *http.Request) error {
 		Username: formData.Get("username"),
 		Password: []byte(formData.Get("password")),
 		Email:    formData.Get("email"),
-		Role:     "admin",
-		IsActive: true}
+		Role:     "admin"}
 	newAdmin, accessToken, err := a.Auth.Register(newAdmin)
 	if err != nil {
 		return err
@@ -59,10 +58,9 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 		Name:          formData.Get("name"),
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
-		Email:         formData.Get("email"),
-		Rating:        0}
-	admin := models.MotelAdmin{UserID: userId}
-	if err := a.MotelManagement.Add(&admin, &motel); err != nil {
+		Email:         formData.Get("email")}
+	admin, err := a.MotelManagement.AddMotel(userId, &motel)
+	if err != nil {
 		return err
 	}
 
@@ -76,7 +74,7 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 	return nil
 }
 
-func (a Admin) EditMotelById(w http.ResponseWriter, req *http.Request) error {
+func (a Admin) EditMotel(w http.ResponseWriter, req *http.Request) error {
 	err := req.ParseForm()
 	if err != nil {
 		return err
@@ -93,20 +91,14 @@ func (a Admin) EditMotelById(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	motelRating, err := strconv.Atoi((formData.Get("rating")))
-	if err != nil {
-		return err
-	}
-
 	motel := models.Motel{
 		MotelID:       motelId,
 		Name:          formData.Get("name"),
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
-		Email:         formData.Get("email"),
-		Rating:        motelRating}
+		Email:         formData.Get("email")}
 
-	if err := a.MotelManagement.EditById(motelId, userId, &motel); err != nil {
+	if err := a.MotelManagement.EditMotel(userId, &motel); err != nil {
 		return err
 	}
 
@@ -116,7 +108,7 @@ func (a Admin) EditMotelById(w http.ResponseWriter, req *http.Request) error {
 	return nil
 }
 
-func (a Admin) DeleteMotelById(w http.ResponseWriter, req *http.Request) error {
+func (a Admin) DeleteMotel(w http.ResponseWriter, req *http.Request) error {
 	motelId, err := strconv.ParseInt(req.PathValue("id"), 10, 64)
 	if err != nil {
 		return err
@@ -127,7 +119,7 @@ func (a Admin) DeleteMotelById(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if err := a.MotelManagement.DeleteById(motelId, userId); err != nil {
+	if err := a.MotelManagement.DeleteMotel(userId, motelId); err != nil {
 		return err
 	}
 
