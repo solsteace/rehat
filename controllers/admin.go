@@ -43,12 +43,12 @@ func (a Admin) Register(w http.ResponseWriter, req *http.Request) error {
 }
 
 func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
-	err := req.ParseForm()
+	userId, err := middlewares.TokenUserId(req.Context())
 	if err != nil {
 		return err
 	}
 
-	userId, err := middlewares.TokenUserId(req.Context())
+	err = req.ParseForm()
 	if err != nil {
 		return err
 	}
@@ -75,17 +75,16 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 }
 
 func (a Admin) EditMotel(w http.ResponseWriter, req *http.Request) error {
-	err := req.ParseForm()
-	if err != nil {
-		return err
-	}
-	formData := req.PostForm
-
 	userId, err := middlewares.TokenUserId(req.Context())
 	if err != nil {
 		return err
 	}
 
+	if err := req.ParseForm(); err != nil {
+		return err
+	}
+
+	formData := req.PostForm
 	motelId, err := strconv.ParseInt(req.PathValue("id"), 10, 64)
 	if err != nil {
 		return err
@@ -97,7 +96,6 @@ func (a Admin) EditMotel(w http.ResponseWriter, req *http.Request) error {
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
 		Email:         formData.Get("email")}
-
 	if err := a.MotelManagement.EditMotel(userId, &motel); err != nil {
 		return err
 	}
