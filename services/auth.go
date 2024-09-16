@@ -1,62 +1,42 @@
 package services
 
 import (
-	"time"
-
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/solsteace/rest/models"
 	"github.com/solsteace/rest/repositories"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type ErrAccessToken struct {
-	Message string `json:"message"`
-}
-
-func (e ErrAccessToken) Error() string {
-	return e.Message
-}
-
 type (
 	Auth struct {
-		AccessTokenCfg
+		AccessToken
 		repositories.User
 	}
 
-	AccessTokenCfg struct {
-		SignMethod jwt.SigningMethod // TODO: Explore more about signing method
-		Lifetime   time.Duration
-		Secret     string
-	}
-
-	TokenClaims struct {
-		UserId int64
-		Role   string
-		jwt.RegisteredClaims
+	UserInfo struct {
+		Id   int64
+		Role string
 	}
 )
 
 func (a Auth) LogIn(username, password string) (string, error) {
 	var accessToken string
 
-	u, err := a.User.GetByUsername(username)
+	user, err := a.User.GetByUsername(username)
 	if err != nil {
 		return accessToken, err
 	}
 
-	err = bcrypt.CompareHashAndPassword(u.Password, []byte(password))
+	err = bcrypt.CompareHashAndPassword(user.Password, []byte(password))
 	if err != nil {
 		return accessToken, err
 	}
 
-	payload := TokenClaims{
-		UserId: u.UserId,
-		Role:   u.Role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(a.AccessTokenCfg.Lifetime)),
+	payload := AccessTokenClaims{
+		UserInfo: UserInfo{
+			Id:   user.UserId,
+			Role: user.Role,
 		}}
-	accessToken, err = a.generateJWT(a.AccessTokenCfg.Secret, payload)
+	accessToken, err = a.AccessToken.Generate(payload)
 	if err != nil {
 		return accessToken, err
 	}
@@ -98,26 +78,15 @@ func (a Auth) Register(user models.User) (models.User, string, error) {
 
 	user.UserId = insertId
 	user.Password = nil
-	payload := TokenClaims{
-		UserId: user.UserId,
-		Role:   user.Role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(a.AccessTokenCfg.Lifetime)),
+	payload := AccessTokenClaims{
+		UserInfo: UserInfo{
+			Id:   user.UserId,
+			Role: user.Role,
 		}}
-	accessToken, err = a.generateJWT(a.AccessTokenCfg.Secret, payload)
+	accessToken, err = a.AccessToken.Generate(payload)
 	if err != nil {
 		return user, accessToken, err
 	}
 
 	return user, accessToken, nil
-}
-
-func (a Auth) generateJWT(secret string, payload TokenClaims) (string, error) {
-	token := jwt.NewWithClaims(a.AccessTokenCfg.SignMethod, payload)
-	tokenString, err := token.SignedString([]byte(secret))
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
 }

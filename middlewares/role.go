@@ -12,7 +12,7 @@ import (
 func Admin(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, req *http.Request) {
-			role, err := TokenUserRole(req.Context())
+			userInfo, err := UserFromToken(req.Context())
 			if err != nil {
 				sendError(w, http.StatusBadRequest, struct {
 					Message string `json:"message"`
@@ -20,6 +20,7 @@ func Admin(next http.Handler) http.Handler {
 				return
 			}
 
+			role := userInfo.Role
 			if role != "admin" && role != "superadmin" {
 				sendError(w, http.StatusForbidden, struct {
 					Message string `json:"message"`
@@ -37,7 +38,7 @@ func Admin(next http.Handler) http.Handler {
 func Superadmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, req *http.Request) {
-			role, err := TokenUserRole(req.Context())
+			userInfo, err := UserFromToken(req.Context())
 			if err != nil {
 				sendError(w, http.StatusBadRequest, struct {
 					Message string `json:"message"`
@@ -45,6 +46,7 @@ func Superadmin(next http.Handler) http.Handler {
 				return
 			}
 
+			role := userInfo.Role
 			if role != "superadmin" {
 				sendError(w, http.StatusForbidden, struct {
 					Message string `json:"message"`

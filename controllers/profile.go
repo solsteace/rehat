@@ -12,12 +12,12 @@ type Profile struct {
 }
 
 func (p Profile) Index(w http.ResponseWriter, req *http.Request) error {
-	userId, err := middlewares.TokenUserId(req.Context())
+	userInfo, err := middlewares.UserFromToken(req.Context())
 	if err != nil {
 		return err
 	}
 
-	user, err := p.Service.Index(userId)
+	user, err := p.Service.Index(userInfo.Id)
 	if err != nil {
 		return err
 	}

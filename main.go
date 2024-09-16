@@ -12,7 +12,6 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
-	"github.com/solsteace/rest/services"
 )
 
 func main() {
@@ -29,10 +28,14 @@ func main() {
 
 	app := app{
 		db: db,
-		AccessTokenCfg: services.AccessTokenCfg{
-			SignMethod: jwt.SigningMethodHS256,
-			Lifetime:   time.Minute * time.Duration(jwtLifetime),
-			Secret:     os.Getenv("JWT_SECRET")}}
+		accessTokenCfg: struct {
+			signMethod jwt.SigningMethod
+			lifetime   time.Duration
+			secret     string
+		}{
+			signMethod: jwt.SigningMethodHS256,
+			lifetime:   time.Minute * time.Duration(jwtLifetime),
+			secret:     os.Getenv("JWT_SECRET")}}
 	app.init()
 	server := http.Server{
 		Addr:    fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT")),

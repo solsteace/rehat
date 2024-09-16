@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/solsteace/rest/controllers"
 	mw "github.com/solsteace/rest/middlewares"
 	"github.com/solsteace/rest/repositories"
@@ -11,9 +13,13 @@ import (
 )
 
 type app struct {
-	db     *sql.DB
-	router *http.ServeMux
-	services.AccessTokenCfg
+	db             *sql.DB
+	router         *http.ServeMux
+	accessTokenCfg struct {
+		signMethod jwt.SigningMethod
+		lifetime   time.Duration
+		secret     string
+	}
 }
 
 // Initializes apps by setting up routes, handlers, services, and more.
@@ -25,26 +31,31 @@ func (a *app) init() {
 	roomRepo := repositories.Room{Db: a.db}
 	classRepo := repositories.Class{Db: a.db}
 
+	accessTokenService := services.AccessToken{
+		SignMethod: a.accessTokenCfg.signMethod,
+		Lifetime:   a.accessTokenCfg.lifetime,
+		Secret:     a.accessTokenCfg.secret}
 	authService := services.Auth{
-		User:           userRepo,
-		AccessTokenCfg: a.AccessTokenCfg}
+		AccessToken: accessTokenService,
+		User:        userRepo}
 	profileService := services.Profile{UserRepo: userRepo}
-	MotelManagementService := services.MotelManagement{
+	motelManagementService := services.MotelManagement{
 		Motel:      motelRepo,
 		MotelAdmin: motelAdminRepo}
 	reservationService := services.Reservation{
 		Room:        roomRepo,
 		Reservation: reservationRepo,
-		Class:       classRepo,
-	}
+		Class:       classRepo}
 
 	motel := controllers.Motel{MotelRepo: motelRepo}
 	auth := controllers.Auth{Service: authService}
 	admin := controllers.Admin{
 		Auth:            authService,
-		MotelManagement: MotelManagementService}
+		MotelManagement: motelManagementService}
 	profile := controllers.Profile{Service: profileService}
 	reservation := controllers.Reservation{Service: reservationService}
+
+	// TIP: Trace routing from the bottom then work your way up
 
 	motelApi := http.NewServeMux()
 	motelApi.Handle("GET /{id}", mw.HandleError(motel.GetById))

@@ -12,9 +12,12 @@ type MotelManagement struct {
 	repositories.Room
 }
 
-// Checks whether an admin have permission to certain motel
-func (m MotelManagement) checkMotelPermission(userId, motelId int64) error {
-	if _, err := m.MotelAdmin.GetByUserAndMotelId(userId, motelId); err != nil {
+// Checks whether an admin have permission to certain motel. `Superadmin` bypasses this
+func (m MotelManagement) checkMotelPermission(user UserInfo, motelId int64) error {
+	if user.Role == "superadmin" {
+		return nil
+	}
+	if _, err := m.MotelAdmin.GetByUserAndMotelId(user.Id, motelId); err != nil {
 		if _, ok := err.(*repositories.ErrRecordNotFound); ok {
 			return &ErrNoResourcePermission{}
 		}
@@ -24,7 +27,7 @@ func (m MotelManagement) checkMotelPermission(userId, motelId int64) error {
 }
 
 // Inserts a record of motel and admin associated with it to the database
-func (m MotelManagement) AddMotel(userId int64, motel *models.Motel) (models.MotelAdmin, error) {
+func (m MotelManagement) AddMotel(user UserInfo, motel *models.Motel) (models.MotelAdmin, error) {
 	var admin models.MotelAdmin
 
 	motelId, err := m.Motel.Save(*motel)
@@ -32,7 +35,7 @@ func (m MotelManagement) AddMotel(userId int64, motel *models.Motel) (models.Mot
 		return admin, err
 	}
 
-	admin = models.MotelAdmin{UserID: userId, MotelID: motelId}
+	admin = models.MotelAdmin{UserID: user.Id, MotelID: motelId}
 	adminId, err := m.MotelAdmin.Save(admin)
 	if err != nil {
 		return admin, err
@@ -43,12 +46,12 @@ func (m MotelManagement) AddMotel(userId int64, motel *models.Motel) (models.Mot
 }
 
 // Edits a motel record by saving passed `motel`
-func (m MotelManagement) EditMotel(userId int64, motel *models.Motel) error {
+func (m MotelManagement) EditMotel(user UserInfo, motel *models.Motel) error {
 	if _, err := m.Motel.GetById(motel.MotelID); err != nil {
 		return err
 	}
 
-	if err := m.checkMotelPermission(userId, motel.MotelID); err != nil {
+	if err := m.checkMotelPermission(user, motel.MotelID); err != nil {
 		return err
 	}
 
@@ -59,12 +62,12 @@ func (m MotelManagement) EditMotel(userId int64, motel *models.Motel) error {
 }
 
 // Deletes a motel record with certain id
-func (m MotelManagement) DeleteMotel(userId, motelId int64) error {
+func (m MotelManagement) DeleteMotel(user UserInfo, motelId int64) error {
 	if _, err := m.Motel.GetById(motelId); err != nil {
 		return err
 	}
 
-	if err := m.checkMotelPermission(userId, motelId); err != nil {
+	if err := m.checkMotelPermission(user, motelId); err != nil {
 		return err
 	}
 
@@ -74,8 +77,8 @@ func (m MotelManagement) DeleteMotel(userId, motelId int64) error {
 	return nil
 }
 
-func (m MotelManagement) AddRoom(userId int64, room *models.Room) error {
-	if err := m.checkMotelPermission(userId, room.MotelID); err != nil {
+func (m MotelManagement) AddRoom(user UserInfo, room *models.Room) error {
+	if err := m.checkMotelPermission(user, room.MotelID); err != nil {
 		return err
 	}
 
@@ -85,12 +88,12 @@ func (m MotelManagement) AddRoom(userId int64, room *models.Room) error {
 	return nil
 }
 
-func (m MotelManagement) EditRoom(userId int64, room *models.Room) error {
+func (m MotelManagement) EditRoom(user UserInfo, room *models.Room) error {
 	if _, err := m.Room.GetById(room.RoomID); err != nil {
 		return err
 	}
 
-	if err := m.checkMotelPermission(userId, room.MotelID); err != nil {
+	if err := m.checkMotelPermission(user, room.MotelID); err != nil {
 		return err
 	}
 
@@ -101,12 +104,12 @@ func (m MotelManagement) EditRoom(userId int64, room *models.Room) error {
 	return nil
 }
 
-func (m MotelManagement) DeleteRoom(userId, roomId int64) error {
+func (m MotelManagement) DeleteRoom(user UserInfo, roomId int64) error {
 	if _, err := m.Room.GetById(roomId); err != nil {
 		return err
 	}
 
-	if err := m.checkMotelPermission(userId, roomId); err != nil {
+	if err := m.checkMotelPermission(user, roomId); err != nil {
 		return err
 	}
 

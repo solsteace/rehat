@@ -43,7 +43,7 @@ func (a Admin) Register(w http.ResponseWriter, req *http.Request) error {
 }
 
 func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
-	userId, err := middlewares.TokenUserId(req.Context())
+	userInfo, err := middlewares.UserFromToken(req.Context())
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
 		Email:         formData.Get("email")}
-	admin, err := a.MotelManagement.AddMotel(userId, &motel)
+	admin, err := a.MotelManagement.AddMotel(userInfo, &motel)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (a Admin) AddMotel(w http.ResponseWriter, req *http.Request) error {
 }
 
 func (a Admin) EditMotel(w http.ResponseWriter, req *http.Request) error {
-	userId, err := middlewares.TokenUserId(req.Context())
+	userInfo, err := middlewares.UserFromToken(req.Context())
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (a Admin) EditMotel(w http.ResponseWriter, req *http.Request) error {
 		Location:      formData.Get("location"),
 		ContactNumber: formData.Get("contactNumber"),
 		Email:         formData.Get("email")}
-	if err := a.MotelManagement.EditMotel(userId, &motel); err != nil {
+	if err := a.MotelManagement.EditMotel(userInfo, &motel); err != nil {
 		return err
 	}
 
@@ -112,12 +112,12 @@ func (a Admin) DeleteMotel(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	userId, err := middlewares.TokenUserId(req.Context())
+	userInfo, err := middlewares.UserFromToken(req.Context())
 	if err != nil {
 		return err
 	}
 
-	if err := a.MotelManagement.DeleteMotel(userId, motelId); err != nil {
+	if err := a.MotelManagement.DeleteMotel(userInfo, motelId); err != nil {
 		return err
 	}
 

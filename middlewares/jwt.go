@@ -13,10 +13,6 @@ import (
 
 type (
 	middlewareKey string
-	tokenContent  struct {
-		userId   int64
-		userRole string
-	}
 )
 
 const tokenKey middlewareKey = "token"
@@ -50,7 +46,7 @@ func Jwt(next http.Handler) http.Handler {
 
 			parsedToken, err := jwt.ParseWithClaims(
 				token,
-				&services.TokenClaims{},
+				&services.AccessTokenClaims{},
 				func(t *jwt.Token) (interface{}, error) {
 					// TODO: Ensure sign method is similar to what being used in server
 					return []byte(os.Getenv("JWT_SECRET")), nil
@@ -61,7 +57,7 @@ func Jwt(next http.Handler) http.Handler {
 				return
 			}
 
-			claims, ok := parsedToken.Claims.(*services.TokenClaims)
+			claims, ok := parsedToken.Claims.(*services.AccessTokenClaims)
 			if !ok {
 				payload := services.ErrAccessToken{Message: "No defined claim found within JWT"}
 				sendError(w, http.StatusBadRequest, payload)
@@ -71,26 +67,22 @@ func Jwt(next http.Handler) http.Handler {
 			ctx := context.WithValue(
 				context.Background(),
 				middlewareKey(tokenKey),
-				&tokenContent{
-					userId:   claims.UserId,
-					userRole: claims.Role})
+				&services.AccessTokenClaims{
+					UserInfo: services.UserInfo{
+						Id:   claims.UserInfo.Id,
+						Role: claims.UserInfo.Role}})
 			next.ServeHTTP(w, req.WithContext(ctx))
 		},
 	)
 }
 
-func TokenUserId(ctx context.Context) (int64, error) {
-	v, ok := ctx.Value(tokenKey).(*tokenContent)
+func UserFromToken(ctx context.Context) (services.UserInfo, error) {
+	var user services.UserInfo
+	v, ok := ctx.Value(tokenKey).(*services.AccessTokenClaims)
 	if !ok {
-		return 0, errors.New("no `userId` found")
+		return user, errors.New("couldn't infer User from token")
 	}
-	return v.userId, nil
-}
 
-func TokenUserRole(ctx context.Context) (string, error) {
-	v, ok := ctx.Value(tokenKey).(*tokenContent)
-	if !ok {
-		return "", errors.New("no `userRole` found")
-	}
-	return v.userRole, nil
+	user = v.UserInfo
+	return user, nil
 }
